@@ -1,0 +1,16 @@
+<?php
+/**
+ * @package      Webcode_Glami
+ *
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2020 Webcode Ltd. (https://webcode.bg/)
+ * @license      See LICENSE.txt for license details.
+ */
+?>
+<?php if (($event = $block->getEventName()) && ($data = $block->getEventData()) && $block->isPixelEnabled()) : ?>
+    <script>
+        glami('track', '<?php echo $event; ?>', <?php echo $data; ?>);
+        console.log('<?php echo $event; ?>');
+        console.log('<?php echo $data; ?>');
+    </script>
+<?php endif;

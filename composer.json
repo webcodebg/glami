@@ -1,0 +1,30 @@
+{
+  "name": "webcode/magento2-glami",
+  "description": "Glami Pixel",
+  "type": "magento2-module",
+  "version": "1.0.0",
+  "minimum-stability": "dev",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "require": {
+    "webcode/magento2-core": "*"
+  },
+  "authors": [
+    {
+      "name": "Kostadin Bashev",
+      "email": "bashev@webcode.bg",
+      "homepage": "https://webcode.bg/",
+      "role": "Head Magento Developer"
+    }
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Webcode\\Glami\\": ""
+    }
+  }
+}

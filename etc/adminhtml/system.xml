@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+  ~ @package      Webcode_Glami
+  ~
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2020 Webcode Ltd. (https://webcode.bg/)
+  ~ @license      See LICENSE.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="webcode" translate="label" sortOrder="500">
+            <label>Webcode Extensions</label>
+        </tab>
+        <section id="webcode_glami" translate="label" sortOrder="520" showInDefault="1" showInWebsite="1" showInStore="1">
+            <tab>webcode</tab>
+            <class>separator-top</class>
+            <label>Glami</label>
+            <resource>Webcode_Glami::glami_config</resource>
+
+            <group id="general" translate="label" type="text" sortOrder="30" showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Glami Pixel</label>
+
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enable Glami Pixel</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="pixel_id" translate="label tooltip" type="text" sortOrder="15" showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Glami Pixel ID</label>
+                    <depends>
+                        <field id="pixel_enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
