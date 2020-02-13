@@ -2,14 +2,12 @@
 
 ## Install package
 ``` bash
-composer config repositories.webcode-magento2-glami git https://git.webcode.bg/magento2/glami.git
-composer require webcode/magento2-glami:dev-master
+composer config repositories composer https://packagist.webcode.bg/
+composer require webcode/magento2-glami
 ```
 
 ## Clean Cache
 ``` bash
-php bin/magento cache:clean
-php bin/magento indexer:reindex
-php bin/magento cache:clean
+php bin/magento setup:upgrade
 php bin/magento cache:flush
 ```

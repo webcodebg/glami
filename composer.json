@@ -4,13 +4,6 @@
   "type": "magento2-module",
   "version": "1.0.0",
   "minimum-stability": "dev",
-  "license": [
-    "OSL-3.0",
-    "AFL-3.0"
-  ],
-  "require": {
-    "webcode/magento2-core": "*"
-  },
   "authors": [
     {
       "name": "Kostadin Bashev",
@@ -19,6 +12,13 @@
       "role": "Head Magento Developer"
     }
   ],
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "require": {
+    "webcode/magento2-core": "*"
+  },
   "autoload": {
     "files": [
       "registration.php"
