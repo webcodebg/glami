@@ -15,6 +15,7 @@ use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
+use ReflectionClass;
 use Webcode\Glami\Helper\Data as HelperData;
 
 /**
@@ -94,10 +95,12 @@ class Pixel extends Template
     public function getEventName()
     {
         try {
-            return (new \ReflectionClass($this))->getShortName();
+            return (new ReflectionClass($this))->getShortName();
         } catch (Exception $e) {
             echo $e->getMessage();
         }
+
+        return null;
     }
 
     /**
@@ -118,5 +121,15 @@ class Pixel extends Template
     public function getPixelId()
     {
         return $this->helper->getPixelId();
+    }
+
+    /**
+     * Get Pixel Locale
+     *
+     * @return string|null
+     */
+    public function getLocale()
+    {
+        return $this->helper->getPixelLocale();
     }
 }

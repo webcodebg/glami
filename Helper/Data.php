@@ -9,7 +9,8 @@
 
 namespace Webcode\Glami\Helper;
 
-use Magento\Store\Model\StoreManager;
+use Exception;
+use Magento\Store\Model\Store;
 
 /**
  * Class Data
@@ -31,11 +32,12 @@ class Data extends \Webcode\Core\Helper\Data
      * Format Product Price. Convert currency and add currency label.
      *
      * @param float $price
-     * @param StoreManager $store
+     * @param Store $store
      *
      * @return string
+     * @throws Exception
      */
-    public function formatPrice($price, StoreManager $store)
+    public function formatPrice($price, Store $store)
     {
         $baseCurrencyCode    = $store->getBaseCurrencyCode();
         $currentCurrencyCode = $store->getCurrentCurrencyCode();
@@ -48,6 +50,8 @@ class Data extends \Webcode\Core\Helper\Data
     }
 
     /**
+     * Get Pixel API Key
+     *
      * @return string
      */
     public function getPixelId()
@@ -56,10 +60,28 @@ class Data extends \Webcode\Core\Helper\Data
             if ($this->isEnabled()) {
                 return $this->getConfigData('general/pixel_id');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->alert($this->moduleName, ['message' => $e->getMessage()]);
         }
 
-        return false;
+        return null;
+    }
+
+    /**
+     * Get Pixel Locale
+     *
+     * @return string
+     */
+    public function getPixelLocale()
+    {
+        try {
+            if ($this->isEnabled()) {
+                return $this->getConfigData('general/locale');
+            }
+        } catch (Exception $e) {
+            $this->_logger->alert($this->moduleName, ['message' => $e->getMessage()]);
+        }
+
+        return null;
     }
 }

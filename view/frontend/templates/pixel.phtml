@@ -15,11 +15,11 @@ use Webcode\Glami\Block\Pixel;
     <!-- Glami piXel -->
     <script>
         (function(f, a, s, h, i, o, n) {f['GlamiTrackerObject'] = i;
-            f[i]=f[i]||function(){(f[i].q=f[i].q||[]).push(arguments)};o=a.createElement(s),
-                n=a.getElementsByTagName(s)[0];o.async=1;o.src=h;n.parentNode.insertBefore(o,n)
+            f[i]=f[i]||function(){(f[i].q=f[i].q||[]).push(arguments)};o=a.createElement(s);
+            n=a.getElementsByTagName(s)[0];o.async=1;o.src=h;n.parentNode.insertBefore(o,n)
         })(window, document, 'script', '//www.glami.bg/js/compiled/pt.js', 'glami');
 
-        glami('create', '<?php echo $pixelId; ?>', 'bg');
+        glami('create', '<?=$pixelId?>', '<?=$block->getLocale()?>');
         glami('track', 'PageView');
     </script>
     <!-- End Glami piXel -->
