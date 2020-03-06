@@ -9,51 +9,77 @@
 
 namespace Webcode\Glami\Block;
 
-use Magento\Cookie\Helper\Cookie as CookieHelper;
+use Exception;
+use Magento\Checkout\Model\Session;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Webcode\Glami\Helper\Data as HelperData;
 
 /**
- * Class Pixel
- * @package Webcode\Glami\Block
+ * Purchase Information to view
  */
 class Purchase extends Pixel
 {
     /**
+     * @var Session
+     */
+    protected $checkoutSession;
+
+    /**
+     * @var HelperData
+     */
+    protected $helper;
+
+    /**
      * Constructor.
      *
-     * @param CookieHelper $cookieHelper
+     * @param Session $checkoutSession
      * @param HelperData $helper
      * @param StoreManagerInterface $storeManager
      * @param Json $json
      * @param Context $context
      * @param array $data
+     *
+     * @throws Exception
      */
     public function __construct(
-        CookieHelper $cookieHelper,
+        Session $checkoutSession,
         HelperData $helper,
         StoreManagerInterface $storeManager,
         Json $json,
         Context $context,
         array $data = []
     ) {
-        parent::__construct($cookieHelper, $helper, $storeManager, $json, $context, $data);
+        $this->checkoutSession = $checkoutSession;
+        $this->helper          = $helper;
+
+        $this->setEventName('Purchase');
         $this->setEventData();
+        parent::__construct($helper, $storeManager, $json, $context, $data);
     }
 
     /**
      * Get product detail info
+     * @throws Exception
      */
     public function setEventData()
     {
-        $this->eventData = ['content_ids' => [1, 2, 3, 4]];
-//        $currentProduct = $this->_helper->getGtmRegistry()->registry('product');
-//        $data['dynamic_remarketing_retail'] = [
-//            'ecomm_prodid'     => $currentProduct->getSku(),
-//            'ecomm_pagetype'   => 'product',
-//            'ecomm_totalvalue' => (float)number_format($currentProduct->getFinalPrice(), 2)
-//        ];
+        $order        = $this->checkoutSession->getLastRealOrder();
+        $itemIds      = [];
+        $productNames = [];
+
+        foreach ($order->getAllVisibleItems() as $item) {
+            $itemIds[]      = $item->getProductId();
+            $productNames[] = $item->getName();
+        }
+
+        $this->eventData = [
+            'item_ids'       => $itemIds,
+            'product_names'  => $productNames,
+            'value'          => $this->helper->formatPrice($order->getGrandTotal(), false),
+            'currency'       => $this->helper->getCurrentStoreCurrency(),
+            'transaction_id' => $order->getIncrementId()
+        ];
     }
 }

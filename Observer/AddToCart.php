@@ -11,49 +11,57 @@ namespace Webcode\Glami\Observer;
 
 use Exception;
 use Magento\Catalog\Model\ProductFactory;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\ObjectManagerInterface;
 use Webcode\Glami\Helper\Data;
+use Webcode\Glami\Model\Session;
 
 /**
- * Class AddToCart
- * @package Webcode\Glami\Observer
+ * Class AddToCart used to hold data from product added to cart and fired with js after that.
  */
 class AddToCart implements ObserverInterface
 {
     /**
-     * Helper
-     *
-     * @var \Webcode\Glami\Helper\Data
+     * @var Session
      */
-    protected $helper;
-
-    /**
-     * Object Manager
-     *
-     * @var \Magento\Framework\ObjectManagerInterface
-     */
-    protected $objectManager;
+    protected $glamiSession;
 
     /**
      * ProductFactory
      *
-     * @var \Magento\Catalog\Model\ProductFactory
+     * @var ProductFactory
      */
     protected $productFactory;
 
     /**
+     * @var Configurable
+     */
+    protected $configurable;
+
+    /**
+     * Helper
+     *
+     * @var Data
+     */
+    protected $helper;
+
+    /**
      * AddToCart constructor.
      *
+     * @param Session $glamiSession
      * @param ProductFactory $productFactory
      * @param Data $helper
      */
     public function __construct(
+        Session $glamiSession,
         ProductFactory $productFactory,
+        Configurable $configurable,
         Data $helper
     ) {
+        $this->glamiSession   = $glamiSession;
         $this->productFactory = $productFactory;
+        $this->configurable = $configurable;
         $this->helper         = $helper;
     }
 
@@ -72,16 +80,18 @@ class AddToCart implements ObserverInterface
             $product = $observer->getData('product');
             $request = $observer->getData('request');
 
-            $qty = $request->getParam('qty');
             if ($product->getTypeId() == "configurable") {
-                $selectedProduct = $this->productFactory->create();
-                $selectedProduct->load($selectedProduct->getIdBySku($product->getSku()));
-                // $this->helper->getSessionManager()->setAddToCartData($this->helper->getAddToCartData($selectedProduct, $qty));
-            } else {
-                // $this->helper->getSessionManager()->setAddToCartData($this->helper->getAddToCartData($product, $qty));
+                $product = $this->configurable->getProductByAttributes($request->getParam('super_attribute'), $product);
             }
-            var_dump(1111);
+
+            $this->glamiSession->setAddToCartData([
+                'item_ids'   => [$product->getId()],
+                'product_names' => [$product->getName()],
+                'value' => $this->helper->formatPrice($product->getFinalPrice(), false),
+                'currency' => $this->helper->getCurrentStoreCurrency(),
+            ]);
         }
+
         return $this;
     }
 }

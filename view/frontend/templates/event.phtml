@@ -10,7 +10,10 @@
 <?php if (($event = $block->getEventName()) && ($data = $block->getEventData()) && $block->isPixelEnabled()) : ?>
     <script>
         glami('track', '<?php echo $event; ?>', <?php echo $data; ?>);
-        console.log('<?php echo $event; ?>');
-        console.log('<?php echo $data; ?>');
     </script>
-<?php endif;
+<?php else : ?>
+    <div data-role="glami-event" style="display:none;"></div>
+    <script type="text/x-magento-init">
+        {"[data-role='glami-event']": {"Magento_Ui/js/core/app": <?php echo $block->getJsLayout();?>}}
+    </script>
+<?php endif; ?>

@@ -1,10 +1,10 @@
 <?php
 /**
- * @package      Sync
+ * @package      Webcode_Glami
  *
  * @author       Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright (c) 2020 Webcode Ltd. (https://webcode.bg/)
- * @license      Academic Free License (AFL 3.0)
+ * @copyright    Copyright © 2020 Webcode Ltd. (https://webcode.bg/)
+ * @license      See LICENSE.txt for license details.
  */
 
 namespace Webcode\Glami\Model\Config\Source;
@@ -39,8 +39,20 @@ class Locale implements OptionSourceInterface
     {
         return [
             'bg' => __('Bulgarian'),
+            'cz' => __('Chech'),
+            'hr' => __('Croatian'),
+            'eco' => __('English'),
+            'fr' => __('Frensh'),
+            'de' => __('German'),
+            'gr' => __('Greek'),
+            'hu' => __('Hungarian'),
+            'pt' => __('Portuguese'),
             'ro' => __('Romanian'),
-            'en' => __('English')
+            'ru' => __('Russian'),
+            'sk' => __('Slovak'),
+            'si' => __('Slovenian'),
+            'es' => __('Spanish'),
+            'tr' => __('Turkish')
         ];
     }
 

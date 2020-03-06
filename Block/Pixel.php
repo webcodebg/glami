@@ -10,17 +10,15 @@
 namespace Webcode\Glami\Block;
 
 use Exception;
-use Magento\Cookie\Helper\Cookie as CookieHelper;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
-use ReflectionClass;
 use Webcode\Glami\Helper\Data as HelperData;
 
 /**
- * Class Pixel
- * @package Webcode\Glami\Block
+ * Pixel Block
  *
  * @SuppressWarnings(PHPMD.NumberOfChildren)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -28,18 +26,18 @@ use Webcode\Glami\Helper\Data as HelperData;
 class Pixel extends Template
 {
     /**
+     * Event Name
+     *
+     * @var $this
+     */
+    public $eventName = null;
+
+    /**
      * Set EventData
      *
      * @var $this
      */
     public $eventData;
-
-    /**
-     * HelperCookie
-     *
-     * @var CookieHelper
-     */
-    protected $cookieHelper;
 
     /**
      * HelperData
@@ -65,7 +63,6 @@ class Pixel extends Template
     /**
      * Constructor.
      *
-     * @param CookieHelper $cookieHelper
      * @param HelperData $helper
      * @param StoreManagerInterface $storeManager
      * @param Json $json
@@ -73,7 +70,6 @@ class Pixel extends Template
      * @param array $data
      */
     public function __construct(
-        CookieHelper $cookieHelper,
         HelperData $helper,
         StoreManagerInterface $storeManager,
         Json $json,
@@ -81,10 +77,19 @@ class Pixel extends Template
         array $data = []
     ) {
         $this->helper       = $helper;
-        $this->cookieHelper = $cookieHelper;
         $this->json         = $json;
         $this->storeManager = $storeManager;
         parent::__construct($context, $data);
+    }
+
+    /**
+     * Set EventName
+     *
+     * @param $name
+     */
+    public function setEventName($name)
+    {
+        $this->eventName = $name;
     }
 
     /**
@@ -94,13 +99,7 @@ class Pixel extends Template
      */
     public function getEventName()
     {
-        try {
-            return (new ReflectionClass($this))->getShortName();
-        } catch (Exception $e) {
-            echo $e->getMessage();
-        }
-
-        return null;
+        return $this->eventName;
     }
 
     /**
@@ -131,5 +130,19 @@ class Pixel extends Template
     public function getLocale()
     {
         return $this->helper->getPixelLocale();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPixelEnabled()
+    {
+        try {
+            return $this->helper->isEnabled();
+        } catch (NoSuchEntityException $e) {
+            return false;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }

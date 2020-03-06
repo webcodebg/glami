@@ -26,19 +26,23 @@ class Data extends \Webcode\Core\Helper\Data
     /**
      * @var string Module Name
      */
-    protected $moduleName = 'glami';
+    public $moduleName = 'glami';
 
     /**
      * Format Product Price. Convert currency and add currency label.
      *
      * @param float $price
+     * @param bool $withCurrencyLabel
      * @param Store $store
      *
      * @return string
      * @throws Exception
      */
-    public function formatPrice($price, Store $store)
+    public function formatPrice($price, $withCurrencyLabel = true, Store $store = null)
     {
+        if (!$store) {
+            $store = $this->getCurrentStore();
+        }
         $baseCurrencyCode    = $store->getBaseCurrencyCode();
         $currentCurrencyCode = $store->getCurrentCurrencyCode();
 
@@ -46,7 +50,17 @@ class Data extends \Webcode\Core\Helper\Data
             $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
         }
 
-        return number_format($price, 2) . ' ' . $currentCurrencyCode;
+        return number_format($price, 2) . $withCurrencyLabel ?? (' ' . $currentCurrencyCode);
+    }
+
+    /**
+     * Get Current Store Curreny
+     *
+     * @return mixed
+     */
+    public function getCurrentStoreCurrency()
+    {
+        return $this->getCurrentStore()->getCurrentCurrencyCode();
     }
 
     /**
