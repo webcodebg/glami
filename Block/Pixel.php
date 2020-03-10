@@ -10,7 +10,6 @@
 namespace Webcode\Glami\Block;
 
 use Exception;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -139,8 +138,6 @@ class Pixel extends Template
     {
         try {
             return $this->helper->isEnabled();
-        } catch (NoSuchEntityException $e) {
-            return false;
         } catch (Exception $e) {
             return false;
         }
