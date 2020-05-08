@@ -71,7 +71,7 @@ class Data extends \Webcode\Core\Helper\Data
     public function getPixelId()
     {
         try {
-            if ($this->isEnabled()) {
+            if ($this->isActive()) {
                 return $this->getConfigData('general/pixel_id');
             }
         } catch (Exception $e) {
@@ -89,7 +89,7 @@ class Data extends \Webcode\Core\Helper\Data
     public function getPixelLocale()
     {
         try {
-            if ($this->isEnabled()) {
+            if ($this->isActive()) {
                 return $this->getConfigData('general/locale');
             }
         } catch (Exception $e) {

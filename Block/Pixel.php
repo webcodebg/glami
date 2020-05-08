@@ -137,7 +137,7 @@ class Pixel extends Template
     public function isPixelEnabled()
     {
         try {
-            return $this->helper->isEnabled();
+            return $this->helper->isActive();
         } catch (Exception $e) {
             return false;
         }

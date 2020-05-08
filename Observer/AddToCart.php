@@ -76,7 +76,7 @@ class AddToCart implements ObserverInterface
     public function execute(Observer $observer)
     {
 
-        if ($this->helper->isEnabled()) {
+        if ($this->helper->isActive()) {
             $product = $observer->getData('product');
             $request = $observer->getData('request');
 
