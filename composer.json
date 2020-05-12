@@ -2,7 +2,7 @@
   "name": "webcode/magento2-glami",
   "description": "Glami Pixel",
   "type": "magento2-module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minimum-stability": "dev",
   "authors": [
     {
@@ -17,7 +17,7 @@
     "AFL-3.0"
   ],
   "require": {
-    "webcode/magento2-core": "*"
+    "webcode/magento2-core": "^1.0.2"
   },
   "autoload": {
     "files": [
