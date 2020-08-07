@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+  ~ @package      Webcode_Glami
+  ~
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2020 Webcode Ltd. (https://webcode.bg/)
+  ~ @license      See LICENSE.txt for license details.
+  -->
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="glami" type="host">*.glami.bg</value>
+            </values>
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="glami" type="host">*.glami.bg</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>
