@@ -2,15 +2,15 @@
     "name": "webcodebg/module-glami",
     "description": "Glami Pixel & Feed",
     "type": "magento2-module",
-    "minimum-stability": "stable",
     "require": {
         "magento/module-checkout": "^100.4",
         "magento/module-customer": "^103.0",
         "magento/module-ui": "^101.2",
-        "magento/framework": "^103.1",
-        "ext-simplexml": "*",
-        "ext-dom": "*"
+        "magento/framework": "^103.1"
     },
+    "license": [
+        "OSL-3.0"
+    ],
     "authors": [
         {
             "name": "Kostadin Bashev | Webcode",
