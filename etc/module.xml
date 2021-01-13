@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+  ~ @package      Webcode_Glami
+  ~
+  ~ @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+  ~ @license      See LICENSE.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="Webcode_Glami" setup_version="104.0.0">
+        <sequence>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Customer"/>
+        </sequence>
+    </module>
+</config>

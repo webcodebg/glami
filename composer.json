@@ -1,0 +1,30 @@
+{
+    "name": "webcodebg/module-glami",
+    "description": "Glami Pixel & Feed",
+    "type": "magento2-module",
+    "minimum-stability": "stable",
+    "require": {
+        "magento/module-checkout": "^100.4",
+        "magento/module-customer": "^103.0",
+        "magento/module-ui": "^101.2",
+        "magento/framework": "^103.1",
+        "ext-simplexml": "*",
+        "ext-dom": "*"
+    },
+    "authors": [
+        {
+            "name": "Kostadin Bashev | Webcode",
+            "email": "bashev@webcode.bg",
+            "homepage": "https://webcode.bg/",
+            "role": "Magento Developer"
+        }
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Webcode\\Glami\\": ""
+        }
+    }
+}

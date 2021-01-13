@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+  ~ @package      Webcode_Glami
+  ~
+  ~ @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+  ~ @license      See LICENSE.txt for license details.
+  -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="Webcode\Glami\Block\Pixel" name="webcode-glami-pixel" template="pixel.phtml" before="-"/>
+        </referenceBlock>
+        <referenceBlock name="after.body.start">
+            <block class="Magento\Framework\View\Element\Template" name="glami.event"
+                   template="Webcode_Glami::event.phtml">
+                <arguments>
+                    <argument name="jsLayout" xsi:type="array">
+                        <item name="components" xsi:type="array">
+                            <item name="glamiAddToCart" xsi:type="array">
+                                <item name="component" xsi:type="string">Webcode_Glami/js/view/add-to-cart</item>
+                            </item>
+                        </item>
+                    </argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

@@ -1,0 +1,15 @@
+"Locale","Език"
+"This element enables you to have discounts on particular products. If you prefer to set up promotions for whole categories you can do so from your administration section.
+                    <br/>—Take the Voucher ID which was created in the administration section and insert it into the PROMOTION_ID element.
+                    <br/>—The items will be automatically paired with the voucher within 2 hours.","Този елемент ви позволява да имате отстъпки за определени продукти. Ако предпочитате да задавате промоции за цели категории, можете да го направите от секцията за администриране.
+                    <br/>— Вземете идентификатора на ваучер, който беше създаден в секцията за администриране и го поставете в елемента PROMOTION_ID.
+                    <br/>— Артикулите ще бъдат автоматично свързани с ваучера в рамките на 2 часа."
+"By using this element you are able to bid for the increased visibility of particular products. If you prefer to bid for whole categories you can do that from your administration section.—The value is taken by the system only in the case that it is higher than the base CPC.
+                    <br/>—The inserted value is always proportionally increased according to the setting in your administration CPC section.
+                    <br/>—Use absolute values without currency.
+                    <br/>—Use dots or comma's to separate absolute values. Correctly entered value is ""3.5"" or ""3,5"".","Използвайки този елемент, вие можете да наддавате за по-голяма видимост на определени продукти. Ако предпочитате да наддавате за цели категории, можете да го направите от секцията за администрация.
+                    <br/>— Стойността се взема от системата само в случай, че е по-висока от основната за CPC.
+                    <br/>— Вмъкнатата стойност винаги се увеличава пропорционално според настройката в CPC секцията на администрацията.
+                    <br/>— Използвайте абсолютни стойности без валута.
+                    <br/>— Използвайте точки или запетаи, за да разделите абсолютни стойности. Правилно въведената стойност е: ""3,5"" или ""3,5""."
+"Categories list will be displayed after save configuration with Locale.","Списък с категориите ще се покаже след като направите първоначално записване на конфигурацията."

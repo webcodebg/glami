@@ -1,0 +1,14 @@
+<!--
+  ~ @package      Webcode_Glami
+  ~
+  ~ @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+  ~ @license      See LICENSE.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Customer:etc/sections.xsd">
+    <action name="checkout/cart/add">
+        <section name="glami-add-to-cart"/>
+    </action>
+</config>

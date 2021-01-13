@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<!--
+  ~ @package      Webcode_Glami
+  ~
+  ~ @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+  ~ @license      See LICENSE.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="glami" translate="label" sortOrder="520" showInDefault="1" showInWebsite="1"
+                 showInStore="1">
+            <tab>sales</tab>
+            <class>separator-top</class>
+            <label>Glami</label>
+            <resource>Webcode_Glami::glami_config</resource>
+
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Glami piXel</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enable Glami piXel</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="pixel_id" translate="label tooltip" type="text" sortOrder="15" showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Glami API Key</label>
+                    <depends>
+                        <field id="pixel_enabled">1</field>
+                    </depends>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="locale" translate="label tooltip" type="select" sortOrder="15" showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Locale</label>
+                    <depends>
+                        <field id="pixel_enabled">1</field>
+                    </depends>
+                    <source_model>Webcode\Glami\Model\Config\Source\Locale</source_model>
+                    <validate>required-entry</validate>
+                </field>
+            </group>
+
+            <group id="feed" translate="label comment" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Feed</label>
+
+                <field id="attributes" translate="label comment tooltip" type="multiselect" sortOrder="10" showInDefault="1" showInWebsite="1">
+                    <label>Allowed Attributes</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                    <comment>
+                        <![CDATA[Select attributes which wants to be added in the feed.]]>
+                    </comment>
+                </field>
+
+                <field id="manufacturer" translate="label comment tooltip" type="select" sortOrder="15" showInDefault="1" showInWebsite="1">
+                    <label>Manufacturer Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                </field>
+
+                <field id="ean" translate="label comment tooltip" type="select" sortOrder="20" showInDefault="1" showInWebsite="1">
+                    <label>EAN Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                </field>
+
+                <field id="glami_cpc" translate="label comment tooltip" type="select" sortOrder="30" showInDefault="1" showInWebsite="1">
+                    <label>GLAMI_CPC Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                    <tooltip><![CDATA[By using this element you are able to bid for the increased visibility of particular products. If you prefer to bid for whole categories you can do that from your administration section.—The value is taken by the system only in the case that it is higher than the base CPC.
+                    <br/>—The inserted value is always proportionally increased according to the setting in your administration CPC section.
+                    <br/>—Use absolute values without currency.
+                    <br/>—Use dots or comma's to separate absolute values. Correctly entered value is "3.5" or "3,5".]]></tooltip>
+                </field>
+
+                <field id="promotion_id" translate="label comment tooltip" type="select" sortOrder="40" showInDefault="1" showInWebsite="1">
+                    <label>PROMOTION_ID Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                    <tooltip><![CDATA[This element enables you to have discounts on particular products. If you prefer to set up promotions for whole categories you can do so from your administration section.
+                    <br/>—Take the Voucher ID which was created in the administration section and insert it into the PROMOTION_ID element.
+                    <br/>—The items will be automatically paired with the voucher within 2 hours.]]></tooltip>
+                </field>
+
+                <field id="categories" translate="label comment tooltip" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Categories Mapping</label>
+                    <frontend_model>Webcode\Glami\Block\Adminhtml\System\Config\Form\Field\Categories</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+
+                <field id="cron" translate="label comment" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Cron for Feed Generation</label>
+                    <comment><![CDATA[<pre>* * * * *
+| | | | |
+| | | | +---- Day of the Week   (range: 1-7, 1 standing for Monday)
+| | | +------ Month of the Year (range: 1-12)
+| | +-------- Day of the Month  (range: 1-31)
+| +---------- Hour              (range: 0-23)
++------------ Minute            (range: 0-59)
+Default: 55 * * * * Hourly at 55 min of every hour.
+</pre>]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>

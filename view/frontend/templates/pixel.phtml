@@ -1,0 +1,26 @@
+<?php
+/*
+ * @package      Webcode_Glami
+ *
+ * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @license      See LICENSE.txt for license details.
+ */
+
+use Webcode\Glami\Block\Pixel;
+
+/** @var $block Pixel */
+?>
+<?php if ($pixelId = $block->getPixelId()) : ?>
+    <!-- Glami piXel -->
+    <script>
+        (function(f, a, s, h, i, o, n) {f['GlamiTrackerObject'] = i;
+            f[i]=f[i]||function(){(f[i].q=f[i].q||[]).push(arguments)};o=a.createElement(s);
+            n=a.getElementsByTagName(s)[0];o.async=1;o.src=h;n.parentNode.insertBefore(o,n)
+        })(window, document, 'script', '//www.glami.bg/js/compiled/pt.js', 'glami');
+
+        glami('create', '<?=$pixelId?>', '<?=$block->getLocale()?>');
+        glami('track', 'PageView');
+    </script>
+    <!-- End Glami piXel -->
+<?php endif;
