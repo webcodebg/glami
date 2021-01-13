@@ -17,7 +17,7 @@ If your store supports different languages (excl. en_US) use
 ```` bash
 php bin/magento setup:static-content-deploy en_US bg_BG
 ```` 
-git 
+
 Flush cache
 ```` bash
 php bin/magento cache:flush
@@ -32,6 +32,8 @@ Feed location is one of these:
 ``https://example.com/feed/glami/[store_code].xml``
 or ``https://example.com/pub/feed/glami/[store_code].xml``
 where ``[store_code]`` = code of the store. Default value: default.
+
+Feed URL can be found here: Stores - Configuration - Sales - Glami - Feed
 
 You can be generated via console command.
 ``` bash
