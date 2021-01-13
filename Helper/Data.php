@@ -288,7 +288,7 @@ class Data extends AbstractHelper
             'bg' => 'https://www.glami.bg/kategoria-xml/',
             'cz' => 'https://www.glami.cz/category-xml/',
             'hr' => 'https://www.glami.hr/category-xml/',
-            'eco' => 'https://www.glami.eco/category-xml/',
+            'eco' => 'https://www.glami.eco/categorie-xml/',
             'fr' => 'https://www.glami.fr/category-xml/',
             'de' => 'https://www.glami.de/category-xml/',
             'gr' => 'https://www.glami.gr/category-xml/',

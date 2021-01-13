@@ -39,7 +39,7 @@ class Locale implements OptionSourceInterface
     {
         return [
             'bg' => __('Bulgarian'),
-            'cz' => __('Chech'),
+            'cz' => __('Czech'),
             'hr' => __('Croatian'),
             'eco' => __('English'),
             'fr' => __('Frensh'),
