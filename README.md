@@ -25,3 +25,15 @@ php bin/magento cache:flush
 
 ## Module Configuration Settings
 Stores - Configuration - Sales - Glami
+
+## Generate Feed
+
+Feed location is one of these: 
+``https://example.com/feed/glami/[store_code].xml``
+or ``https://example.com/pub/feed/glami/[store_code].xml``
+where ``[store_code]`` = code of the store. Default value: default.
+
+You can be generated via console command.
+``` bash
+php bin/magento glami:feed:generate
+```
