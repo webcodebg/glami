@@ -12,10 +12,12 @@ namespace Webcode\Glami\Helper;
 use Exception;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\Xml\Parser;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -43,6 +45,11 @@ class Data extends AbstractHelper
     public const XML_PATH_PIXEL_ID = 'general/pixel_id';
 
     /**
+     * Feed URL
+     */
+    public const FEED_DIR = 'feed' . DS . 'glami';
+
+    /**
      * @var StoreManagerInterface
      */
     public $storeManager;
@@ -68,12 +75,18 @@ class Data extends AbstractHelper
     private $glamiCategories = [];
 
     /**
+     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * Data constructor.
      *
      * @param CategoryRepositoryInterface $categoryRepository
      * @param StoreManagerInterface $storeManager
      * @param \Magento\Framework\Xml\Parser $parser
      * @param \Magento\Framework\Serialize\Serializer\Json $json
+     * @param \Magento\Framework\App\Filesystem\DirectoryList $directoryList
      * @param Context $context
      */
     public function __construct(
@@ -81,12 +94,14 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         Parser $parser,
         Json $json,
+        DirectoryList $directoryList,
         Context $context
     ) {
         $this->categoryRepository = $categoryRepository;
         $this->storeManager = $storeManager;
         $this->parser = $parser;
         $this->json = $json;
+        $this->directoryList = $directoryList;
         parent::__construct($context);
     }
 
@@ -140,7 +155,7 @@ class Data extends AbstractHelper
             $this->logger($e->getMessage());
         }
 
-        return null;
+        return $this->storeManager->getDefaultStoreView();
     }
 
     /**
@@ -158,7 +173,9 @@ class Data extends AbstractHelper
         if (!$store) {
             $store = $this->getCurrentStore();
         }
+        /* @phpstan-ignore-next-line */
         $baseCurrencyCode = $store->getBaseCurrencyCode();
+        /* @phpstan-ignore-next-line */
         $currentCurrencyCode = $store->getCurrentCurrencyCode();
 
         if ($baseCurrencyCode !== $currentCurrencyCode) {
@@ -354,6 +371,30 @@ class Data extends AbstractHelper
         }
 
         return $this->glamiCategories;
+    }
+
+    /**
+     * @return string
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    public function getFeedPath(): string
+    {
+        return $this->directoryList->getPath(DirectoryList::PUB) . DS . self::FEED_DIR . DS;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFeedUrl(): ?string
+    {
+        if ($store = $this->getCurrentStore()) {
+            /* @phpstan-ignore-next-line */
+            $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
+            $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
+            return $baseUrl . self::FEED_DIR . DS . $store->getCode() . '.xml';
+        }
+
+        return null;
     }
 
     /**

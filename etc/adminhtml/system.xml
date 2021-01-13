@@ -52,6 +52,12 @@
             <group id="feed" translate="label comment" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Feed</label>
 
+                <field id="feed_url" translate="label comment tooltip" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Feed URL</label>
+                    <frontend_model>Webcode\Glami\Block\Adminhtml\System\Config\Form\Field\FeedUrl</frontend_model>
+                    <comment><![CDATA[Paste this address in your GLAMI Account: Profile - Edit Profile - Feed URL Address]]></comment>
+                </field>
+
                 <field id="attributes" translate="label comment tooltip" type="multiselect" sortOrder="10" showInDefault="1" showInWebsite="1">
                     <label>Allowed Attributes</label>
                     <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>

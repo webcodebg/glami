@@ -41,8 +41,6 @@ class GenerateFeed
 {
     public const COLLECTION_LIMIT = 100;
 
-    public const FEED_DIR = 'feed' . DS . 'glami';
-
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -82,11 +80,6 @@ class GenerateFeed
      * @var \Magento\Framework\Filesystem\Io\File
      */
     private $file;
-
-    /**
-     * @var \Magento\Framework\App\Filesystem\DirectoryList
-     */
-    private $directoryList;
 
     /**
      * @var Configurable
@@ -129,7 +122,6 @@ class GenerateFeed
         StockResolverInterface $stockResolver,
         AreProductsSalableInterface $areProductsSalable,
         Helper $helper,
-        DirectoryList $directoryList,
         DriverInterface $filesystemDriver,
         File $file
     ) {
@@ -141,7 +133,6 @@ class GenerateFeed
         $this->stockResolver = $stockResolver;
         $this->areProductsSalable = $areProductsSalable;
         $this->helper = $helper;
-        $this->directoryList = $directoryList;
         $this->filesystemDriver = $filesystemDriver;
         $this->file = $file;
     }
@@ -279,9 +270,8 @@ class GenerateFeed
                     }
                 }
 
-                if ($this->getProduct()->getCategoryIds() &&
-                    $category = $this->helper->getGlamiCategory($this->getProduct()->getCategoryIds())
-                ) {
+                /* @phpstan-ignore-next-line */
+                if ($category = $this->helper->getGlamiCategory($this->getProduct()->getCategoryIds())) {
                     $item->addChild('CATEGORYTEXT', $category);
                 }
             }
@@ -291,7 +281,7 @@ class GenerateFeed
             }
         }
 
-        $dir = $this->directoryList->getPath(DirectoryList::PUB) . DS . self::FEED_DIR . DS;
+        $dir = $this->helper->getFeedPath();
         if (!$this->filesystemDriver->isDirectory($dir) || $this->file->fileExists($dir)) {
             $this->file->mkdir($dir, 0755);
         }
