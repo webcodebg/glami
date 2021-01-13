@@ -18,7 +18,7 @@ class Session extends SessionManager
      *
      * @return $this
      */
-    public function setAddToCartData($data)
+    public function setAddToCartData($data): Session
     {
         $this->setData('add_to_cart', $data);
 

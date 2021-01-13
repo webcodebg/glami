@@ -28,7 +28,6 @@ use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Helper\ProgressBarFactory;
 use Webcode\Glami\Helper\Data as Helper;
 
 /**
