@@ -1,24 +1,31 @@
 # Magento 2 Glami Pixel
 
 ## Install package
+### Get Package
+
+#### Magento 2.4.x (latest)
 ``` bash
 composer require webcodebg/module-glami
 ```
+#### Magento 2.3.x
+``` bash
+composer require webcodebg/module-glami:^103.0
+```
 
+### Setup after get package
 ``` bash
 php bin/magento setup:upgrade
 ````
-
 ``` bash
 php bin/magento setup:di:compile
 php bin/magento setup:static-content-deploy
 ```
-If your store supports different languages (excl. en_US) use
+If your store supports different languages (excl. bg_BG) use
 ```` bash
 php bin/magento setup:static-content-deploy en_US bg_BG
 ```` 
 
-Flush cache
+####Flush cache
 ```` bash
 php bin/magento cache:flush
 ````
@@ -27,7 +34,6 @@ php bin/magento cache:flush
 Stores - Configuration - Sales - Glami
 
 ## Generate Feed
-
 Feed location is one of these: 
 ``https://example.com/feed/glami/[store_code].xml``
 or ``https://example.com/pub/feed/glami/[store_code].xml``
