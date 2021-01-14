@@ -8,11 +8,10 @@
  */
 
 /** @var \Webcode\Glami\Block\Pixel $block */
-/** @var \Magento\Framework\Escaper $escaper */
 ?>
 <?php if (($event = $block->getEventName()) && ($block->isPixelEnabled() && $data = $block->getEventData())):?>
     <script>
-        glami('track', '<?= $escaper->escapeJs($event) ?>', <?= /** @noEscape */ $data ?>);
+        glami('track', '<?= $block->escapeJs($event) ?>', <?= /** @noEscape */ $data ?>);
     </script>
 <?php else:?>
     <div data-role="glami-event" style="display:none;"></div>

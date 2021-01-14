@@ -40,11 +40,10 @@ class FeedUrl extends \Magento\Config\Block\System\Config\Form\Field
     public function __construct(
         Context $context,
         Data $helper,
-        array $data = [],
-        ?SecureHtmlRenderer $secureRenderer = null
+        array $data = []
     ) {
         $this->helper = $helper;
-        parent::__construct($context, $data, $secureRenderer);
+        parent::__construct($context, $data);
     }
 
     /**

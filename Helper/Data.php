@@ -47,7 +47,7 @@ class Data extends AbstractHelper
     /**
      * Feed URL
      */
-    public const FEED_DIR = 'feed' . DS . 'glami';
+    public const FEED_DIR = 'feed' . DIRECTORY_SEPARATOR . 'glami';
 
     /**
      * @var StoreManagerInterface
@@ -380,7 +380,7 @@ class Data extends AbstractHelper
      */
     public function getFeedPath(): string
     {
-        return $this->directoryList->getPath(DirectoryList::PUB) . DS . self::FEED_DIR . DS;
+        return $this->directoryList->getPath(DirectoryList::PUB) . DIRECTORY_SEPARATOR . self::FEED_DIR . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -392,7 +392,7 @@ class Data extends AbstractHelper
             /* @phpstan-ignore-next-line */
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
             $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
-            return $baseUrl . self::FEED_DIR . DS . $store->getCode() . '.xml';
+            return $baseUrl . self::FEED_DIR . DIRECTORY_SEPARATOR . $store->getCode() . '.xml';
         }
 
         return null;

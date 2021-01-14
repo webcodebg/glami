@@ -8,7 +8,6 @@
  */
 
 /** @var \Webcode\Glami\Block\Pixel $block */
-/** @var \Magento\Framework\Escaper $escaper */
 ?>
 <?php if ($pixelId = $block->getPixelId()): ?>
     <!-- Glami piXel -->
@@ -17,8 +16,8 @@
             f[i]=f[i]||function(){(f[i].q=f[i].q||[]).push(arguments)};o=a.createElement(s);
             n=a.getElementsByTagName(s)[0];o.async=1;o.src=h;n.parentNode.insertBefore(o,n)
         })(window, document, 'script',
-            '//www.glami.<?= $escaper->escapeJs($block->getLocale()) ?>/js/compiled/pt.js', 'glami');
-        glami('create', '<?= $escaper->escapeJs($pixelId) ?>', '<?= $escaper->escapeJs($block->getLocale()) ?>');
+            '//www.glami.<?= $block->escapeJs($block->getLocale()) ?>/js/compiled/pt.js', 'glami');
+        glami('create', '<?= $block->escapeJs($pixelId) ?>', '<?= $block->escapeJs($block->getLocale()) ?>');
         glami('track', 'PageView');
     </script>
     <!-- End Glami piXel -->

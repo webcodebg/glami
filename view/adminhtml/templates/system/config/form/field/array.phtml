@@ -10,33 +10,32 @@
 // phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
 
 /** @var \Magento\Backend\Block\Template $block */
-/** @var \Magento\Framework\Escaper $escaper */
 
 $_htmlId = $block->getHtmlId() ?: '_' . uniqid('', true);
 ?>
 <?php if ($block->getGlamiCategoryRenderer()->canRenderCategories()): ?>
-    <div class="design_theme_ua_regexp" id="grid<?= $escaper->escapeHtmlAttr($_htmlId) ?>">
+    <div class="design_theme_ua_regexp" id="grid<?= $block->escapeHtmlAttr($_htmlId) ?>">
         <div class="admin__control-table-wrapper">
-            <table class="admin__control-table" id="<?= $escaper->escapeHtmlAttr($block->getElement()->getId()) ?>">
+            <table class="admin__control-table" id="<?= $block->escapeHtmlAttr($block->getElement()->getId()) ?>">
                 <thead>
                 <tr>
                     <?php foreach ($block->getColumns() as $columnName => $column): ?>
-                        <th style="width:50%"><?= $escaper->escapeHtml($column['label']) ?></th>
+                        <th style="width:50%"><?= $block->escapeHtml($column['label']) ?></th>
                     <?php endforeach ?>
                 </tr>
                 </thead>
-                <tbody id="addRow<?= $escaper->escapeHtmlAttr($_htmlId) ?>">
+                <tbody id="addRow<?= $block->escapeHtmlAttr($_htmlId) ?>">
                 <?php foreach ($block->getArrayRows() as $_rowId => $_row): ?>
                 <tr>
                     <td>
-                       <input type="hidden" id="<?= $escaper->escapeHtmlAttr($_rowId) ?>_source_id"
-                       name="groups[feed][fields][categories][value][<?= $escaper->escapeHtml($_rowId) ?>][source_id]"
-                           value="<?= $escaper->escapeHtml($_row->getData('source_id')) ?>"
+                       <input type="hidden" id="<?= $block->escapeHtmlAttr($_rowId) ?>_source_id"
+                       name="groups[feed][fields][categories][value][<?= $block->escapeHtml($_rowId) ?>][source_id]"
+                           value="<?= $block->escapeHtml($_row->getData('source_id')) ?>"
                            readonly="readonly"/>
-                       <input type="text" id="<?= $escaper->escapeHtml($_rowId) ?>_source"
-                           name="groups[feed][fields][categories][value][<?= $escaper->escapeHtml($_rowId) ?>][source]"
-                           title="<?= $escaper->escapeHtml($_row->getData('source')) ?>"
-                           value="<?= $escaper->escapeHtml($_row->getData('source')) ?>"
+                       <input type="text" id="<?= $block->escapeHtml($_rowId) ?>_source"
+                           name="groups[feed][fields][categories][value][<?= $block->escapeHtml($_rowId) ?>][source]"
+                           title="<?= $block->escapeHtml($_row->getData('source')) ?>"
+                           value="<?= $block->escapeHtml($_row->getData('source')) ?>"
                            class="input-text" readonly="readonly"/>
                     </td>
                     <td>
@@ -44,8 +43,8 @@ $_htmlId = $block->getHtmlId() ?: '_' . uniqid('', true);
                         str_replace('<%- _id %>', $_rowId, $block->renderCellTemplate('target')) ?>
                         <script>
                             require(['jquery'], function ($) {
-                                $('#<?= $escaper->escapeHtmlAttr($_rowId)?>_target')
-                                    .val('<?= $escaper->escapeHtmlAttr($_row->getData('target')) ?>');
+                                $('#<?= $block->escapeHtmlAttr($_rowId)?>_target')
+                                    .val('<?= $block->escapeHtmlAttr($_row->getData('target')) ?>');
                             })
                         </script>
                     </td>
@@ -54,10 +53,10 @@ $_htmlId = $block->getHtmlId() ?: '_' . uniqid('', true);
                 </tbody>
             </table>
         </div>
-        <input type="hidden" name="<?= $escaper->escapeHtmlAttr($block->getElement()->getName()) ?>[__empty]" value=""/>
+        <input type="hidden" name="<?= $block->escapeHtmlAttr($block->getElement()->getName()) ?>[__empty]" value=""/>
     </div>
 <?php else: ?>
     <button type="submit" id="save-glami-config" class="action-default scalable save primary ui-button ui-widget
-    ui-state-default ui-corner-all ui-button-text-only"><?= $escaper->escapeHtml(__('Save Config')) ?></button>
-    <small><?= $escaper->escapeHtml(__('Categories will be displayed after save configuration with Locale.')) ?></small>
+    ui-state-default ui-corner-all ui-button-text-only"><?= $block->escapeHtml(__('Save Config')) ?></button>
+    <small><?= $block->escapeHtml(__('Categories will be displayed after save configuration with Locale.')) ?></small>
 <?php endif ?>

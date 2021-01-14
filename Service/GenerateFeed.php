@@ -22,7 +22,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Simplexml\Element;
-use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
+use Magento\InventorySalesApi\Api\IsProductSalableInterface;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Api\Data\StoreInterface;
@@ -71,9 +71,9 @@ class GenerateFeed
     private $stockResolver;
 
     /**
-     * @var \Magento\InventorySalesApi\Api\AreProductsSalableInterface
+     * @var \Magento\InventorySalesApi\Api\IsProductSalableInterface
      */
-    private $areProductsSalable;
+    private $isProductsSalable;
 
     /**
      * @var \Magento\Framework\Filesystem\Io\File
@@ -119,7 +119,7 @@ class GenerateFeed
         ProductRepository $productRepository,
         Configurable $configurable,
         StockResolverInterface $stockResolver,
-        AreProductsSalableInterface $areProductsSalable,
+        IsProductSalableInterface $isProductsSalable,
         Helper $helper,
         DriverInterface $filesystemDriver,
         File $file
@@ -130,7 +130,7 @@ class GenerateFeed
         $this->productRepository = $productRepository;
         $this->configurable = $configurable;
         $this->stockResolver = $stockResolver;
-        $this->areProductsSalable = $areProductsSalable;
+        $this->isProductsSalable = $isProductsSalable;
         $this->helper = $helper;
         $this->filesystemDriver = $filesystemDriver;
         $this->file = $file;
@@ -254,7 +254,7 @@ class GenerateFeed
                 }
 
                 foreach ($this->helper->getAllowedAttributes() as $allowedAttribute) {
-                    if (!$attributeValue = $product->getAttributeText($allowedAttribute)) {
+                    if (!empty($allowedAttribute) && !$attributeValue = $product->getAttributeText($allowedAttribute)) {
                         /* @phpstan-ignore-next-line */
                         $attributeValue = $this->getProduct()->getAttributeText($allowedAttribute);
                     }
@@ -394,14 +394,7 @@ class GenerateFeed
     private function isProductAvailable(StoreInterface $store, string $sku): bool
     {
         $stockId = $this->getStockIdByStore($store);
-        $result = $this->areProductsSalable->execute([$sku], $stockId);
-        if (\is_array($result)) {
-            foreach ($result as $product) {
-                if ($product->getSku() === $sku) {
-                    return $product->isSalable();
-                }
-            }
-        }
+        return $this->isProductsSalable->execute($sku, $stockId);
 
         return false;
     }
