@@ -7,17 +7,16 @@
  * @license      See LICENSE.txt for license details.
  */
 
-use Webcode\Glami\Block\Pixel;
-
-/** @var $block Pixel */
+/** @var \Webcode\Glami\Block\Pixel $block */
+/** @var \Magento\Framework\Escaper $escaper */
 ?>
-<?php if (($event = $block->getEventName()) && ($block->isPixelEnabled() && $data = $block->getEventData())) : ?>
+<?php if (($event = $block->getEventName()) && ($block->isPixelEnabled() && $data = $block->getEventData())):?>
     <script>
-        glami('track', '<?php echo $event; ?>', <?php echo $data; ?>);
+        glami('track', '<?= $escaper->escapeJs($event) ?>', <?= /** @noEscape */ $data ?>);
     </script>
-<?php else : ?>
+<?php else:?>
     <div data-role="glami-event" style="display:none;"></div>
     <script type="text/x-magento-init">
-        {"[data-role='glami-event']": {"Magento_Ui/js/core/app": <?php echo $block->getJsLayout();?>}}
+        {"[data-role='glami-event']": {"Magento_Ui/js/core/app": <?= $block->getJsLayout() ?>}}
     </script>
-<?php endif; ?>
+<?php endif ?>

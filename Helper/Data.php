@@ -218,7 +218,7 @@ class Data extends AbstractHelper
      *
      * @return string
      */
-    public function getPixelLocale(): ?string
+    public function getPixelLocale(): string
     {
         try {
             if ($this->isActive()) {
@@ -228,7 +228,7 @@ class Data extends AbstractHelper
             $this->logger($e->getMessage());
         }
 
-        return null;
+        return 'eco';
     }
 
     /**
@@ -266,6 +266,7 @@ class Data extends AbstractHelper
      * @param CategoryInterface $category
      *
      * @return string
+     * @SuppressWarnings(PHPMD.ShortVariableNames)
      */
     public function getCategoryPathName(CategoryInterface $category): string
     {

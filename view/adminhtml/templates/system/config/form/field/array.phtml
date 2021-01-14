@@ -7,50 +7,57 @@
  * @license      See LICENSE.txt for license details.
  */
 
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
+
 /** @var \Magento\Backend\Block\Template $block */
 /** @var \Magento\Framework\Escaper $escaper */
 
-$_htmlId = $block->getHtmlId() ? $block->getHtmlId() : '_' . uniqid('', true);
+$_htmlId = $block->getHtmlId() ?: '_' . uniqid('', true);
 ?>
-<?php if ($block->getGlamiCategoryRenderer()->canRenderCategories()) : ?>
-<div class="design_theme_ua_regexp" id="grid<?= $escaper->escapeHtmlAttr($_htmlId) ?>">
-    <div class="admin__control-table-wrapper">
-        <table class="admin__control-table" id="<?= $escaper->escapeHtmlAttr($block->getElement()->getId()) ?>">
-            <thead>
-            <tr>
-                <?php foreach ($block->getColumns() as $columnName => $column): ?>
-                    <th style="width:50%"><?= $escaper->escapeHtml($column['label']) ?></th>
-                <?php endforeach ?>
-            </tr>
-            </thead>
-            <tbody id="addRow<?= $escaper->escapeHtmlAttr($_htmlId) ?>">
-                <?php foreach ($block->getArrayRows() as $_rowId => $_row) : ?>
-                    <tr>
-                        <td>
-                            <input type="hidden" id="<?= $_rowId ?>_source_id"
-                                   name="groups[feed][fields][categories][value][<?= $_rowId ?>][source_id]"
-                                   value="<?= $_row->getData('source_id') ?>" readonly="readonly"/>
-                            <input type="text" id="<?= $_rowId ?>_source"
-                                   name="groups[feed][fields][categories][value][<?= $_rowId ?>][source]"
-                                   title="<?= $_row->getData('source') ?>"
-                                   value="<?= $_row->getData('source') ?>" class="input-text" readonly="readonly"/>
-                        </td>
-                        <td>
-                            <?= str_replace('<%- _id %>', $_rowId, $block->renderCellTemplate('target')) ?>
-                            <script>
-                                require(['jquery'], function ($) {
-                                    $('#<?= $_rowId?>_target').val('<?= $_row->getData('target') ?>');
-                                })
-                            </script>
-                        </td>
-                    </tr>
+<?php if ($block->getGlamiCategoryRenderer()->canRenderCategories()): ?>
+    <div class="design_theme_ua_regexp" id="grid<?= $escaper->escapeHtmlAttr($_htmlId) ?>">
+        <div class="admin__control-table-wrapper">
+            <table class="admin__control-table" id="<?= $escaper->escapeHtmlAttr($block->getElement()->getId()) ?>">
+                <thead>
+                <tr>
+                    <?php foreach ($block->getColumns() as $columnName => $column): ?>
+                        <th style="width:50%"><?= $escaper->escapeHtml($column['label']) ?></th>
+                    <?php endforeach ?>
+                </tr>
+                </thead>
+                <tbody id="addRow<?= $escaper->escapeHtmlAttr($_htmlId) ?>">
+                <?php foreach ($block->getArrayRows() as $_rowId => $_row): ?>
+                <tr>
+                    <td>
+                       <input type="hidden" id="<?= $escaper->escapeHtmlAttr($_rowId) ?>_source_id"
+                       name="groups[feed][fields][categories][value][<?= $escaper->escapeHtml($_rowId) ?>][source_id]"
+                           value="<?= $escaper->escapeHtml($_row->getData('source_id')) ?>"
+                           readonly="readonly"/>
+                       <input type="text" id="<?= $escaper->escapeHtml($_rowId) ?>_source"
+                           name="groups[feed][fields][categories][value][<?= $escaper->escapeHtml($_rowId) ?>][source]"
+                           title="<?= $escaper->escapeHtml($_row->getData('source')) ?>"
+                           value="<?= $escaper->escapeHtml($_row->getData('source')) ?>"
+                           class="input-text" readonly="readonly"/>
+                    </td>
+                    <td>
+                        <?= /* @noEscape */
+                        str_replace('<%- _id %>', $_rowId, $block->renderCellTemplate('target')) ?>
+                        <script>
+                            require(['jquery'], function ($) {
+                                $('#<?= $escaper->escapeHtmlAttr($_rowId)?>_target')
+                                    .val('<?= $escaper->escapeHtmlAttr($_row->getData('target')) ?>');
+                            })
+                        </script>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+        <input type="hidden" name="<?= $escaper->escapeHtmlAttr($block->getElement()->getName()) ?>[__empty]" value=""/>
     </div>
-    <input type="hidden" name="<?= $escaper->escapeHtmlAttr($block->getElement()->getName()) ?>[__empty]" value="" />
-</div>
-<?php else : ?>
-    <button type="submit" id="save-glami-config" class="action-default scalable save primary ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><?= __('Save Config') ?></button>
-    <small><?= __('Categories will be displayed after save configuration with Locale.') ?></small>
+<?php else: ?>
+    <button type="submit" id="save-glami-config" class="action-default scalable save primary ui-button ui-widget
+    ui-state-default ui-corner-all ui-button-text-only"><?= $escaper->escapeHtml(__('Save Config')) ?></button>
+    <small><?= $escaper->escapeHtml(__('Categories will be displayed after save configuration with Locale.')) ?></small>
 <?php endif ?>
