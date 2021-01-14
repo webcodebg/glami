@@ -25,7 +25,7 @@ If your store supports different languages (excl. bg_BG) use
 php bin/magento setup:static-content-deploy en_US bg_BG
 ```` 
 
-####Flush cache
+#### Flush cache
 ```` bash
 php bin/magento cache:flush
 ````
