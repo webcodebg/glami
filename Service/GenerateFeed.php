@@ -254,7 +254,7 @@ class GenerateFeed
                 }
 
                 foreach ($this->helper->getAllowedAttributes() as $allowedAttribute) {
-                    if (!$attributeValue = $product->getAttributeText($allowedAttribute)) {
+                    if (!empty($attributeValue) && !$attributeValue = $product->getAttributeText($allowedAttribute)) {
                         /* @phpstan-ignore-next-line */
                         $attributeValue = $this->getProduct()->getAttributeText($allowedAttribute);
                     }
