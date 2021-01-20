@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -22,7 +22,7 @@ class Locale implements OptionSourceInterface
      *
      * @return array
      */
-    public function getAllOption(): array
+    public function getAllOption()
     {
         $options = $this->getOptionArray();
         array_unshift($options, ['value' => '', 'label' => '']);
@@ -35,7 +35,7 @@ class Locale implements OptionSourceInterface
      *
      * @return array
      */
-    public function getOptionArray(): array
+    public function getOptionArray()
     {
         return [
             'bg' => __('Bulgarian'),
@@ -65,7 +65,7 @@ class Locale implements OptionSourceInterface
      *
      * @return array
      */
-    public function getAllOptions(): array
+    public function getAllOptions()
     {
         $res = $this->getOptions();
         array_unshift($res, ['value' => '', 'label' => '']);
@@ -78,7 +78,7 @@ class Locale implements OptionSourceInterface
      *
      * @return array
      */
-    public function getOptions(): array
+    public function getOptions()
     {
         $res = [];
         foreach ($this->getOptionArray() as $index => $value) {
@@ -91,7 +91,7 @@ class Locale implements OptionSourceInterface
     /**
      * @inheritdoc
      */
-    public function toOptionArray(): array
+    public function toOptionArray()
     {
         return $this->getOptions();
     }

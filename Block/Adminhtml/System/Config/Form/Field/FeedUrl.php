@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -41,7 +41,7 @@ class FeedUrl extends \Magento\Config\Block\System\Config\Form\Field
         Context $context,
         Data $helper,
         array $data = [],
-        ?SecureHtmlRenderer $secureRenderer = null
+        $secureRenderer = null
     ) {
         $this->helper = $helper;
         parent::__construct($context, $data, $secureRenderer);
@@ -55,7 +55,7 @@ class FeedUrl extends \Magento\Config\Block\System\Config\Form\Field
      * @return string
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function _renderScopeLabel(AbstractElement $element): ?string
+    protected function _renderScopeLabel(AbstractElement $element)
     {
         return null;
     }
@@ -69,7 +69,7 @@ class FeedUrl extends \Magento\Config\Block\System\Config\Form\Field
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function _getElementHtml(AbstractElement $element): string
+    protected function _getElementHtml(AbstractElement $element)
     {
         return $this->helper->getFeedUrl();
     }

@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -14,12 +14,12 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Simplexml\Element;
 use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
@@ -38,7 +38,7 @@ use Webcode\Glami\Helper\Data as Helper;
  */
 class GenerateFeed
 {
-    public const COLLECTION_LIMIT = 100;
+    const COLLECTION_LIMIT = 100;
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -66,16 +66,6 @@ class GenerateFeed
     private $productRepository;
 
     /**
-     * @var \Magento\InventorySalesApi\Api\StockResolverInterface
-     */
-    private $stockResolver;
-
-    /**
-     * @var \Magento\InventorySalesApi\Api\AreProductsSalableInterface
-     */
-    private $areProductsSalable;
-
-    /**
      * @var \Magento\Framework\Filesystem\Io\File
      */
     private $file;
@@ -87,13 +77,13 @@ class GenerateFeed
 
     private $store;
 
-    private $filesystemDriver;
-
     private $progressBar;
 
     private $product;
-
-    private $stockId;
+    /**
+     * @var StockRegistryInterface
+     */
+    private $stockRegistry;
 
     /**
      * Product Feed constructor.
@@ -103,11 +93,8 @@ class GenerateFeed
      * @param ProductStatus $productStatus
      * @param ProductRepository $productRepository
      * @param Configurable $configurable
-     * @param \Magento\InventorySalesApi\Api\StockResolverInterface $stockResolver
-     * @param \Magento\InventorySalesApi\Api\AreProductsSalableInterface $areProductsSalable
+     * @param StockRegistryInterface $stockRegistry
      * @param Helper $helper
-     * @param DirectoryList $directoryList
-     * @param \Magento\Framework\Filesystem\DriverInterface $filesystemDriver
      * @param File $file
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -118,10 +105,8 @@ class GenerateFeed
         ProductStatus $productStatus,
         ProductRepository $productRepository,
         Configurable $configurable,
-        StockResolverInterface $stockResolver,
-        AreProductsSalableInterface $areProductsSalable,
+        StockRegistryInterface $stockRegistry,
         Helper $helper,
-        DriverInterface $filesystemDriver,
         File $file
     ) {
         $this->storeManager = $storeManager;
@@ -129,17 +114,15 @@ class GenerateFeed
         $this->productStatus = $productStatus;
         $this->productRepository = $productRepository;
         $this->configurable = $configurable;
-        $this->stockResolver = $stockResolver;
-        $this->areProductsSalable = $areProductsSalable;
+        $this->stockRegistry = $stockRegistry;
         $this->helper = $helper;
-        $this->filesystemDriver = $filesystemDriver;
         $this->file = $file;
     }
 
     /**
      * @param \Symfony\Component\Console\Helper\ProgressBar $progressBar
      */
-    public function setProgressBar(ProgressBar $progressBar): void
+    public function setProgressBar(ProgressBar $progressBar)
     {
         $this->progressBar = $progressBar;
     }
@@ -147,7 +130,7 @@ class GenerateFeed
     /**
      * @return bool
      */
-    public function hasProgressBar(): bool
+    public function hasProgressBar()
     {
         return $this->progressBar instanceof ProgressBar;
     }
@@ -158,7 +141,7 @@ class GenerateFeed
      * @return array
      * @throws \Exception
      */
-    public function execute($storeCode = null): array
+    public function execute($storeCode = null)
     {
         foreach ($this->storeManager->getStores() as $store) {
             /* @phpstan-ignore-next-line */
@@ -190,17 +173,14 @@ class GenerateFeed
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    protected function generateFeed(StoreInterface $store): void
+    protected function generateFeed(StoreInterface $store)
     {
         $xml = new Element("<?xml version='1.0' encoding='UTF-8' standalone='yes'?><SHOP/>");
 
         $productsCollection = $this->getProductsCollection();
-        if ($this->hasProgressBar()) {
-            $this->progressBar->setMaxSteps($productsCollection->getSize());
-        }
 
         foreach ($productsCollection as $product) {
-            if ($this->isProductAvailable($store, $product->getSku())) {
+            if ($this->stockRegistry->getStockStatusBySku($product->getSku())) {
                 $this->product = $product;
 
                 $item = $xml->addChild('SHOPITEM');
@@ -281,7 +261,7 @@ class GenerateFeed
         }
 
         $dir = $this->helper->getFeedPath();
-        if (!$this->filesystemDriver->isDirectory($dir) || $this->file->fileExists($dir)) {
+        if (!is_dir($dir) || $this->file->fileExists($dir)) {
             $this->file->mkdir($dir, 0755);
         }
 
@@ -297,7 +277,7 @@ class GenerateFeed
      * @return object
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getProductsCollection($page = 0): object
+    protected function getProductsCollection($page = 0)
     {
         $collection = $this->productCollection->create();
         $collection->addAttributeToSelect('*')->setStore($this->store);
@@ -321,7 +301,7 @@ class GenerateFeed
      * @param string $name
      * @param string|null $value
      */
-    private function addChildWithCData(\SimpleXMLElement $element, string $name, ?string $value): void
+    private function addChildWithCData(\SimpleXMLElement $element, $name, $value)
     {
         $child = $element->addChild($name);
         $dom = dom_import_simplexml($child);
@@ -334,7 +314,7 @@ class GenerateFeed
      *
      * @return int|bool
      */
-    private function getParentProductId(int $childProductId)
+    private function getParentProductId($childProductId)
     {
         $parentConfigObject = $this->configurable->getParentIdsByChild($childProductId);
         if ($parentConfigObject) {
@@ -349,7 +329,7 @@ class GenerateFeed
      *
      * @return Product|ProductInterface
      */
-    private function getProduct($parent = true): ProductInterface
+    private function getProduct($parent = true)
     {
         if ($parent && $parentProductId = $this->getParentProductId($this->product->getId())) {
             try {
@@ -362,47 +342,5 @@ class GenerateFeed
         }
 
         return $this->product;
-    }
-
-    /**
-     * @param StoreInterface $store
-     *
-     * @return int
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    private function getStockIdByStore(StoreInterface $store): int
-    {
-        $storeId = $store->getId();
-        if (!isset($this->stockId[$storeId])) {
-            $websiteCode = $this->storeManager->getWebsite($store->getWebsiteId())->getCode();
-            $stock = $this->stockResolver->execute(SalesChannelInterface::TYPE_WEBSITE, $websiteCode);
-            $this->stockId[$storeId] = (int)$stock->getStockId();
-        }
-
-        return (int)$this->stockId[$storeId];
-    }
-
-    /**
-     * @param StoreInterface $store
-     * @param string $sku
-     *
-     * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    private function isProductAvailable(StoreInterface $store, string $sku): bool
-    {
-        $stockId = $this->getStockIdByStore($store);
-        $result = $this->areProductsSalable->execute([$sku], $stockId);
-        if (\is_array($result)) {
-            foreach ($result as $product) {
-                if ($product->getSku() === $sku) {
-                    return $product->isSalable();
-                }
-            }
-        }
-
-        return false;
     }
 }

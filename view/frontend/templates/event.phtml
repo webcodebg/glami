@@ -2,17 +2,16 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
 /** @var \Webcode\Glami\Block\Pixel $block */
-/** @var \Magento\Framework\Escaper $escaper */
 ?>
 <?php if (($event = $block->getEventName()) && ($block->isPixelEnabled() && $data = $block->getEventData())):?>
     <script>
-        glami('track', '<?= $escaper->escapeJs($event) ?>', <?= /** @noEscape */ $data ?>);
+        glami('track', '<?= /** @noEscape */ $event ?>', <?= /** @noEscape */ $data ?>);
     </script>
 <?php else:?>
     <div data-role="glami-event" style="display:none;"></div>

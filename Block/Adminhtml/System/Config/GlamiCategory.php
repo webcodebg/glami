@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -22,11 +22,6 @@ use Webcode\Glami\Helper\Data;
  */
 class GlamiCategory extends Select
 {
-    /**
-     * @var \Magento\Framework\Xml\Parser
-     */
-    private $parser;
-
     /**
      * @var \Webcode\Glami\Helper\Data
      */
@@ -51,7 +46,7 @@ class GlamiCategory extends Select
     /**
      * @return bool
      */
-    public function canRenderCategories(): bool
+    public function canRenderCategories()
     {
         if ($this->helper->getGlamiCategories()) {
             return true;
@@ -66,7 +61,7 @@ class GlamiCategory extends Select
      * @return string
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
-    protected function _toHtml(): string
+    protected function _toHtml()
     {
         $this->setId($this->getData('input_id'));
         $this->setData('name', $this->getData('input_name'));

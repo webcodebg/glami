@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -56,22 +56,20 @@ class Categories extends AbstractFieldArray
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Exception
      */
-    public function getArrayRows(): array
+    public function getArrayRows()
     {
         $arrayRows = parent::getArrayRows();
 
         $categories = [];
         $path = '';
         foreach ($this->getCategoryRenderer()->getCategoryList() as $category) {
-            if ($category->getLevel() > 1) {
-                if ($category->getLevel() > 2) {
-                    $path .= ' > ';
-                } else {
-                    $path = '';
-                }
-
-                $path .= $category->getName();
+            if ($category->getLevel() > 2) {
+                $path .= ' > ';
+            } else {
+                $path = '';
             }
+
+            $path .= $category->getName();
 
             $categories[$category->getId()] = $path;
         }
@@ -103,7 +101,7 @@ class Categories extends AbstractFieldArray
         return $arrayRows;
     }
 
-    protected function _prepareToRender(): void
+    protected function _prepareToRender()
     {
         try {
             $this->addColumn('source', ['label' => __('Magento')]);

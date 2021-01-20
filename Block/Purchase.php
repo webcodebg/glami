@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -11,7 +11,8 @@ namespace Webcode\Glami\Block;
 
 use Exception;
 use Magento\Checkout\Model\Session;
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Json\Decoder;
+use Magento\Framework\Json\Encoder;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Webcode\Glami\Helper\Data as HelperData;
@@ -37,7 +38,7 @@ class Purchase extends Pixel
      * @param Session $checkoutSession
      * @param HelperData $helper
      * @param StoreManagerInterface $storeManager
-     * @param Json $json
+     * @param Encoder $jsonEncoder
      * @param Context $context
      * @param array $data
      *
@@ -47,7 +48,7 @@ class Purchase extends Pixel
         Session $checkoutSession,
         HelperData $helper,
         StoreManagerInterface $storeManager,
-        Json $json,
+        Encoder $jsonEncoder,
         Context $context,
         array $data = []
     ) {
@@ -56,21 +57,21 @@ class Purchase extends Pixel
 
         $this->setEventName('Purchase');
         $this->assignEventData();
-        parent::__construct($helper, $storeManager, $json, $context, $data);
+        parent::__construct($helper, $storeManager, $jsonEncoder, $context, $data);
     }
 
     /**
      * Get product detail info
      * @throws Exception
      */
-    public function assignEventData(): void
+    public function assignEventData()
     {
         $order        = $this->checkoutSession->getLastRealOrder();
         $itemIds      = [];
         $productNames = [];
 
         foreach ($order->getAllVisibleItems() as $item) {
-            $itemIds[]      = $item->getProductId();
+            $itemIds[]      = $item->getSku();
             $productNames[] = $item->getName();
         }
 

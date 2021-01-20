@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -56,7 +56,7 @@ class GenerateFeed extends Command
     /**
      * @inheritDoc
      */
-    protected function configure(): void
+    protected function configure()
     {
         $this->setName('glami:feed:generate');
         $this->setDescription('Generate Glami Feed for Store');
@@ -74,7 +74,7 @@ class GenerateFeed extends Command
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
             $this->state->setAreaCode('adminhtml');
@@ -85,17 +85,11 @@ class GenerateFeed extends Command
         }
 
         $progressBar = $this->progressBarFactory->create(['output' => $output]);
-        $progressBar->setFormat('%current%/%max% [%bar%] %percent:3s%% %elapsed% %memory:6s%');
-
-        $output->writeln(__('<info>%1</info>', 'Start Generating Glami Feed.'));
-
         $progressBar->start();
         $this->generateFeedService->setProgressBar($progressBar);
         $this->generateFeedService->execute();
 
         $output->write(PHP_EOL);
-        $output->writeln(__('<info>%1</info>', 'Glami Feed was generated.'));
-
         return Cli::RETURN_SUCCESS;
     }
 }

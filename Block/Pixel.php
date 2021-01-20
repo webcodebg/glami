@@ -2,15 +2,15 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
 namespace Webcode\Glami\Block;
 
 use Exception;
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Json\Encoder;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
@@ -53,30 +53,28 @@ class Pixel extends Template
     protected $storeManager;
 
     /**
-     * JSON Serializer
-     *
-     * @var Json
+     * @var Encoder
      */
-    protected $json;
+    private $jsonEncoder;
 
     /**
      * Constructor.
      *
      * @param HelperData $helper
      * @param StoreManagerInterface $storeManager
-     * @param Json $json
+     * @param Encoder $jsonEncoder
      * @param Context $context
      * @param array $data
      */
     public function __construct(
         HelperData $helper,
         StoreManagerInterface $storeManager,
-        Json $json,
+        Encoder $jsonEncoder,
         Context $context,
         array $data = []
     ) {
         $this->helper = $helper;
-        $this->json = $json;
+        $this->jsonEncoder = $jsonEncoder;
         $this->storeManager = $storeManager;
         parent::__construct($context, $data);
     }
@@ -108,7 +106,7 @@ class Pixel extends Template
      */
     public function getEventData()
     {
-        return $this->json->serialize($this->eventData);
+        return $this->jsonEncoder->encode($this->eventData);
     }
 
     /**
@@ -126,7 +124,7 @@ class Pixel extends Template
      *
      * @return string
      */
-    public function getLocale(): string
+    public function getLocale()
     {
         return $this->helper->getPixelLocale();
     }
@@ -134,11 +132,12 @@ class Pixel extends Template
     /**
      * @return bool
      */
-    public function isPixelEnabled(): bool
+    public function isPixelEnabled()
     {
         try {
             return $this->helper->isActive();
         } catch (Exception $e) {
+            $this->helper->logger($e->getMessage());
             return false;
         }
     }

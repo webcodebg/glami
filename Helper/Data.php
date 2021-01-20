@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -16,7 +16,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Unserialize\Unserialize;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\Xml\Parser;
 use Magento\Store\Api\Data\StoreInterface;
@@ -32,22 +32,22 @@ class Data extends AbstractHelper
     /**
      * Module Name for settings.
      */
-    public const MODULE_NAME = 'glami';
+    const MODULE_NAME = 'glami';
 
     /**
      * Path to module active flag.
      */
-    public const XML_PATH_SYNC_ENABLED = 'general/enabled';
+    const XML_PATH_SYNC_ENABLED = 'general/enabled';
 
     /**
      * Path to Config for Pixel ID
      */
-    public const XML_PATH_PIXEL_ID = 'general/pixel_id';
+    const XML_PATH_PIXEL_ID = 'general/pixel_id';
 
     /**
      * Feed URL
      */
-    public const FEED_DIR = 'feed' . DS . 'glami';
+    const FEED_DIR = 'feed' . DIRECTORY_SEPARATOR . 'glami';
 
     /**
      * @var StoreManagerInterface
@@ -60,12 +60,12 @@ class Data extends AbstractHelper
     private $categoryRepository;
 
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Unserialize;
      */
-    private $json;
+    private $unserialize;
 
     /**
-     * @var \Magento\Framework\Xml\Parser
+     * @var Parser
      */
     private $parser;
 
@@ -75,7 +75,7 @@ class Data extends AbstractHelper
     private $glamiCategories = [];
 
     /**
-     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     * @var DirectoryList
      */
     private $directoryList;
 
@@ -84,23 +84,23 @@ class Data extends AbstractHelper
      *
      * @param CategoryRepositoryInterface $categoryRepository
      * @param StoreManagerInterface $storeManager
-     * @param \Magento\Framework\Xml\Parser $parser
-     * @param \Magento\Framework\Serialize\Serializer\Json $json
-     * @param \Magento\Framework\App\Filesystem\DirectoryList $directoryList
+     * @param Parser $parser
+     * @param Unserialize $unserialize
+     * @param DirectoryList $directoryList
      * @param Context $context
      */
     public function __construct(
         CategoryRepositoryInterface $categoryRepository,
         StoreManagerInterface $storeManager,
         Parser $parser,
-        Json $json,
+        Unserialize $unserialize,
         DirectoryList $directoryList,
         Context $context
     ) {
         $this->categoryRepository = $categoryRepository;
         $this->storeManager = $storeManager;
         $this->parser = $parser;
-        $this->json = $json;
+        $this->unserialize = $unserialize;
         $this->directoryList = $directoryList;
         parent::__construct($context);
     }
@@ -114,7 +114,7 @@ class Data extends AbstractHelper
      * @return string
      * @throws Exception
      */
-    public function getConfigData(string $field, $storeId = null): ?string
+    public function getConfigData($field, $storeId = null)
     {
         if (!$storeId) {
             $storeId = $this->storeManager->getStore()->getId();
@@ -133,7 +133,7 @@ class Data extends AbstractHelper
      * @return bool
      * @throws Exception
      */
-    public function isActive($storeId = null): bool
+    public function isActive($storeId = null)
     {
         if (!$storeId) {
             $storeId = $this->storeManager->getStore()->getId();
@@ -147,7 +147,7 @@ class Data extends AbstractHelper
      *
      * @return StoreInterface|null
      */
-    public function getCurrentStore(): ?StoreInterface
+    public function getCurrentStore()
     {
         try {
             return $this->storeManager->getStore();
@@ -168,7 +168,7 @@ class Data extends AbstractHelper
      * @return string
      * @throws \Exception
      */
-    public function formatPrice(float $price, $withCurrencyLabel = true, Store $store = null): string
+    public function formatPrice($price, $withCurrencyLabel = true, Store $store = null)
     {
         if (!$store) {
             $store = $this->getCurrentStore();
@@ -182,7 +182,7 @@ class Data extends AbstractHelper
             $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
         }
 
-        return number_format($price, 2) . $withCurrencyLabel ?? (' ' . $currentCurrencyCode);
+        return number_format($price, 2) . ($withCurrencyLabel ? ' ' . $currentCurrencyCode : '');
     }
 
     /**
@@ -190,7 +190,7 @@ class Data extends AbstractHelper
      *
      * @return string
      */
-    public function getCurrentStoreCurrency(): string
+    public function getCurrentStoreCurrency()
     {
         return $this->getCurrentStore()->getCurrentCurrencyCode();
     }
@@ -200,7 +200,7 @@ class Data extends AbstractHelper
      *
      * @return string|null
      */
-    public function getPixelId(): ?string
+    public function getPixelId()
     {
         try {
             if ($this->isActive()) {
@@ -218,7 +218,7 @@ class Data extends AbstractHelper
      *
      * @return string
      */
-    public function getPixelLocale(): string
+    public function getPixelLocale()
     {
         try {
             if ($this->isActive()) {
@@ -234,7 +234,7 @@ class Data extends AbstractHelper
     /**
      * @return array
      */
-    public function getAllowedAttributes(): array
+    public function getAllowedAttributes()
     {
         $attributes = null;
         try {
@@ -251,7 +251,7 @@ class Data extends AbstractHelper
      *
      * @return string|null
      */
-    public function getAttributeCode(string $field): ?string
+    public function getAttributeCode($field)
     {
         try {
             return $this->getConfigData('feed/' . $field);
@@ -268,7 +268,7 @@ class Data extends AbstractHelper
      * @return string
      * @SuppressWarnings(PHPMD.ShortVariableNames)
      */
-    public function getCategoryPathName(CategoryInterface $category): string
+    public function getCategoryPathName(CategoryInterface $category)
     {
         $categories = [];
         foreach ($category->getPathIds() as $pathId) {
@@ -283,7 +283,7 @@ class Data extends AbstractHelper
         return implode(' | ', $categories);
     }
 
-    private function getCategoriesUrl(): string
+    private function getCategoriesUrl()
     {
         $urls = [
             'bg' => 'https://www.glami.bg/kategoria-xml/',
@@ -315,7 +315,7 @@ class Data extends AbstractHelper
      *
      * @return string|null
      */
-    public function getGlamiCategory(array $productCategories): ?string
+    public function getGlamiCategory(array $productCategories)
     {
         $categoriesConfigData = '';
         try {
@@ -324,7 +324,7 @@ class Data extends AbstractHelper
             $this->logger($e->getMessage());
         }
 
-        if ($categories = $this->json->unserialize($categoriesConfigData)) {
+        if ($categories = $this->unserialize->unserialize($categoriesConfigData)) {
             foreach ($categories as $category) {
                 if (!empty($category['target']) && \in_array($category['source_id'], $productCategories, true)) {
                     $glamiCategoryIds[] = $category['target'];
@@ -345,7 +345,7 @@ class Data extends AbstractHelper
      *
      * @return array
      */
-    public function appendChildCategories(array $categories, array $options = []): array
+    public function appendChildCategories(array $categories, array $options = [])
     {
         foreach ($categories as $category) {
             if (isset($category['CATEGORY_FULLNAME'])) {
@@ -363,7 +363,7 @@ class Data extends AbstractHelper
     /**
      * @return array
      */
-    public function getGlamiCategories(): array
+    public function getGlamiCategories()
     {
         if (empty($this->glamiCategories) &&
             $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray()
@@ -378,21 +378,21 @@ class Data extends AbstractHelper
      * @return string
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function getFeedPath(): string
+    public function getFeedPath()
     {
-        return $this->directoryList->getPath(DirectoryList::PUB) . DS . self::FEED_DIR . DS;
+        return $this->directoryList->getPath(DirectoryList::PUB) . DIRECTORY_SEPARATOR . self::FEED_DIR . DIRECTORY_SEPARATOR;
     }
 
     /**
      * @return string
      */
-    public function getFeedUrl(): ?string
+    public function getFeedUrl()
     {
         if ($store = $this->getCurrentStore()) {
             /* @phpstan-ignore-next-line */
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
             $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
-            return $baseUrl . self::FEED_DIR . DS . $store->getCode() . '.xml';
+            return $baseUrl . self::FEED_DIR . DIRECTORY_SEPARATOR . $store->getCode() . '.xml';
         }
 
         return null;
@@ -404,7 +404,7 @@ class Data extends AbstractHelper
      *
      * @return \Psr\Log\LoggerInterface
      */
-    public function logger(string $message, string $type = 'alert'): \Psr\Log\LoggerInterface
+    public function logger($message, $type = 'alert')
     {
         return $this->_logger->{$type}(self::MODULE_NAME, ['message' => $message]);
     }

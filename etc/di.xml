@@ -2,8 +2,8 @@
 <!--
   ~ @package      Webcode_Glami
   ~
-  ~ @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
-  ~ @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
   ~ @license      See LICENSE.txt for license details.
   -->
 
@@ -12,8 +12,7 @@
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="webcode_glami_generate_feed" xsi:type="object">Webcode\Glami\Console\Command\GenerateFeed
-                </item>
+                <item name="webcode_glami_generate_feed" xsi:type="object">Webcode\Glami\Console\Command\GenerateFeed</item>
             </argument>
         </arguments>
     </type>

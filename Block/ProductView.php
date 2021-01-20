@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -12,10 +12,9 @@ namespace Webcode\Glami\Block;
 use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Session;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Json\Encoder;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Webcode\Glami\Helper\Data as HelperData;
@@ -47,13 +46,18 @@ class ProductView extends Pixel
     private $productRepository;
 
     /**
+     * @var \Magento\Framework\Registry
+     */
+    private $registry;
+
+    /**
      * Constructor.
      *
      * @param HelperData $helper
      * @param StoreManagerInterface $storeManager
      * @param Session $catalogSession
      * @param ProductRepositoryInterface $productRepository
-     * @param Json $json
+     * @param Encoder $jsonEncoder
      * @param Context $context
      * @param array $data
      *
@@ -63,30 +67,32 @@ class ProductView extends Pixel
         HelperData $helper,
         StoreManagerInterface $storeManager,
         Session $catalogSession,
+        \Magento\Framework\Registry $registry,
         ProductRepositoryInterface $productRepository,
-        Json $json,
+        Encoder $jsonEncoder,
         Context $context,
         array $data = []
     ) {
         $this->catalogSession = $catalogSession;
         $this->productRepository = $productRepository;
         $this->helper = $helper;
+        $this->registry = $registry;
 
         $this->setEventName('ViewContent');
         $this->assignEventData();
-        parent::__construct($helper, $storeManager, $json, $context, $data);
+        parent::__construct($helper, $storeManager, $jsonEncoder, $context, $data);
     }
 
     /**
      * Get product detail info
      * @throws Exception
      */
-    public function assignEventData(): void
+    public function assignEventData()
     {
         $itemIds = [];
 
-        if ($this->getCurrentProduct()) {
-            $itemIds[] = $this->currentProduct->getSku();
+        if ($currentProduct = $this->getCurrentProduct()) {
+            $itemIds[] = $currentProduct->getSku();
         }
 
         // TODO: Add Child Products also.
@@ -102,28 +108,16 @@ class ProductView extends Pixel
      */
     public function getCurrentProduct()
     {
-        if (!$this->currentProduct && ($productId = $this->getProductId())) {
+        if (!$this->currentProduct) {
             try {
-                $this->currentProduct = $this->productRepository->getById($productId);
-            } catch (NoSuchEntityException $e) {
-                $this->_logger->alert($this->helper::MODULE_NAME, ['message' => $e->getMessage()]);
+                $this->currentProduct = $this->registry->registry('current_product');
+            } catch (Exception $e) {
+                $this->helper->logger($e->getMessage());
 
                 return false;
             }
         }
 
         return $this->currentProduct;
-    }
-
-    /**
-     * @return int|bool
-     */
-    private function getProductId()
-    {
-        if (!$this->productId && !$this->productId = (int)$this->catalogSession->getData('last_viewed_product_id')) {
-            return false;
-        }
-
-        return $this->productId;
     }
 }

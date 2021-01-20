@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -16,7 +16,7 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Session;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Json\Encoder;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
 use Webcode\Glami\Helper\Data as HelperData;
@@ -54,7 +54,7 @@ class CategoryView extends Pixel
      * @param StoreManagerInterface $storeManager
      * @param Session $catalogSession
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param Json $json
+     * @param Encoder $jsonEncoder
      * @param Context $context
      * @param array $data
      *
@@ -65,7 +65,7 @@ class CategoryView extends Pixel
         StoreManagerInterface $storeManager,
         Session $catalogSession,
         CategoryRepositoryInterface $categoryRepository,
-        Json $json,
+        Encoder $jsonEncoder,
         Context $context,
         array $data = []
     ) {
@@ -75,21 +75,17 @@ class CategoryView extends Pixel
 
         $this->setEventName('ViewContent');
         $this->assignEventData();
-        parent::__construct($helper, $storeManager, $json, $context, $data);
+        parent::__construct($helper, $storeManager, $jsonEncoder, $context, $data);
     }
 
     /**
      * Get product detail info
      * @throws Exception
      */
-    public function assignEventData(): void
+    public function assignEventData()
     {
         if ($this->getCurrentCategory()) {
             $itemIds = [];
-
-//        if ($this->currentCategory) {
-//            $itemIds[] = $this->currentCategory->getItems();
-//        }
 
             // TODO: Add Products limited with page and filters (if applied)
 
@@ -110,7 +106,7 @@ class CategoryView extends Pixel
             try {
                 $this->currentCategory = $this->categoryRepository->get($categoryId);
             } catch (NoSuchEntityException $e) {
-                $this->_logger->alert($this->helper::MODULE_NAME, ['message' => $e->getMessage()]);
+                $this->helper->logger($e->getMessage());
 
                 return false;
             }
