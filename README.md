@@ -11,6 +11,18 @@ composer require webcodebg/module-glami
 ``` bash
 composer require webcodebg/module-glami:^103.0
 ```
+#### Magento 2.2.x
+``` bash
+composer require webcodebg/module-glami:^102.0
+```
+#### Magento 2.1.x
+``` bash
+composer require webcodebg/module-glami:^101.0
+```
+#### Magento 2.0.x
+``` bash
+composer require webcodebg/module-glami:^100.0
+```
 
 ### Setup after get package
 ``` bash
