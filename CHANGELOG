@@ -1,5 +1,1 @@
-103.0.0 Initial Release for magento 2.3.x
-104.0.0 Initial Release for magento 2.4.x
-104.0.1 Add Visible Feed Url in Stores - Configuration
-104.0.2 Update Dependencies, Fix wrong category URL for the English domain.
-104.0.3 Add additional checks, conform with magento codding standards
+100.0.0 Initial Release for magento 2.0.x
