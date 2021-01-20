@@ -2,8 +2,8 @@
 /*
  * @package      Webcode_Glami
  *
- * @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
- * @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+ * @author       Kostadin Bashev (bashev@webcode.bg)
+ * @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
  * @license      See LICENSE.txt for license details.
  */
 
@@ -85,7 +85,7 @@ class AddToCart implements ObserverInterface
             }
 
             $this->glamiSession->setAddToCartData([
-                'item_ids'   => [$product->getId()],
+                'item_ids'   => [$product->getSku()],
                 'product_names' => [$product->getName()],
                 'value' => $this->helper->formatPrice($product->getFinalPrice(), false),
                 'currency' => $this->helper->getCurrentStoreCurrency(),
