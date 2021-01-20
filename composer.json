@@ -2,15 +2,15 @@
     "name": "webcodebg/module-glami",
     "description": "Glami Pixel & Feed",
     "type": "magento2-module",
-    "version": "101.0.0",
+    "version": "102.0.0",
     "require": {
-        "magento/module-catalog": "101.0.*",
-        "magento/module-configurable-product": "100.1.*",
-        "magento/module-checkout": "100.1.*",
-        "magento/module-customer": "100.1.*",
-        "magento/module-store": "100.1.*",
-        "magento/module-ui": "100.1.*",
-        "magento/framework": "100.1.*"
+        "magento/module-catalog": "102.0.*",
+        "magento/module-configurable-product": "100.2.*",
+        "magento/module-checkout": "100.2.*",
+        "magento/module-customer": "101.0.*",
+        "magento/module-store": "100.2.*",
+        "magento/module-ui": "101.0.*",
+        "magento/framework": "101.0.*"
     },
     "license": [
         "OSL-3.0"
