@@ -2,7 +2,7 @@
     "name": "webcodebg/module-glami",
     "description": "Glami Pixel & Feed",
     "type": "magento2-module",
-    "version": "104.0.3",
+    "version": "104.0.4",
     "require": {
         "magento/module-catalog": "^104.0",
         "magento/module-configurable-product": "^100.4",
