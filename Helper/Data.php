@@ -16,7 +16,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Unserialize\Unserialize;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\Xml\Parser;
 use Magento\Store\Api\Data\StoreInterface;
@@ -60,9 +60,9 @@ class Data extends AbstractHelper
     private $categoryRepository;
 
     /**
-     * @var Unserialize;
+     * @var \Magento\Framework\Serialize\Serializer\Json
      */
-    private $unserialize;
+    private $json;
 
     /**
      * @var Parser
@@ -93,14 +93,14 @@ class Data extends AbstractHelper
         CategoryRepositoryInterface $categoryRepository,
         StoreManagerInterface $storeManager,
         Parser $parser,
-        Unserialize $unserialize,
+        Json $json,
         DirectoryList $directoryList,
         Context $context
     ) {
         $this->categoryRepository = $categoryRepository;
         $this->storeManager = $storeManager;
         $this->parser = $parser;
-        $this->unserialize = $unserialize;
+        $this->json = $json;
         $this->directoryList = $directoryList;
         parent::__construct($context);
     }
@@ -324,7 +324,7 @@ class Data extends AbstractHelper
             $this->logger($e->getMessage());
         }
 
-        if ($categories = $this->unserialize->unserialize($categoriesConfigData)) {
+        if ($categories = $this->json->unserialize($categoriesConfigData)) {
             foreach ($categories as $category) {
                 if (!empty($category['target']) && \in_array($category['source_id'], $productCategories, true)) {
                     $glamiCategoryIds[] = $category['target'];
