@@ -3,13 +3,21 @@
 ## Install package
 ### Get Package
 
-#### Magento 2.4.x (latest)
-``` bash
-composer require webcodebg/module-glami
-```
 #### Magento 2.3.x
 ``` bash
 composer require webcodebg/module-glami:^103.0
+```
+#### Magento 2.2.x
+``` bash
+composer require webcodebg/module-glami:^102.0
+```
+#### Magento 2.1.x
+``` bash
+composer require webcodebg/module-glami:^101.0
+```
+#### Magento 2.0.x
+``` bash
+composer require webcodebg/module-glami:^100.0
 ```
 
 ### Setup after get package
