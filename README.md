@@ -1,29 +1,20 @@
 # Glami Pixel & Feed for Magento 2
 
-![Supported Magento Versions][ico-compatibility]
+GLAMI is a search engine that focuses on all styles of fashion, apparel and accessories which we neatly present and categorize. We are currently present in 14 different countries across Europe and South America.
+GLAMI organises clothes, shoes and accessories from different merchants and presents them nicely altogether accessible for the end user to easily make a purchase based on their preferences.
+
+This extension will allow you to generate the feed required to list your products on GLAMI as well as implement the pixel for better results.
 
 ## Install package
 ### Get Package
 
 #### Magento 2.4.x (latest)
 ``` bash
-composer require webcodebg/module-glami
+composer require webcode/module-glami
 ```
 #### Magento 2.3.x
 ``` bash
-composer require webcodebg/module-glami:^103.0
-```
-#### Magento 2.2.x
-``` bash
-composer require webcodebg/module-glami:^102.0
-```
-#### Magento 2.1.x
-``` bash
-composer require webcodebg/module-glami:^101.0
-```
-#### Magento 2.0.x
-``` bash
-composer require webcodebg/module-glami:^100.0
+composer require webcode/module-glami:^103.0
 ```
 
 ### Setup after get package
