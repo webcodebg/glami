@@ -1,7 +1,5 @@
 # Glami Pixel & Feed for Magento 2
 
-![Supported Magento Versions][ico-compatibility]
-
 ## Install package
 ### Get Package
 
