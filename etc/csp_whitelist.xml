@@ -2,8 +2,8 @@
 <!--
   ~ @package      Webcode_Glami
   ~
-  ~ @author       Webcode, Kostadin Bashev (bashev@webcode.bg)
-  ~ @copyright    Copyright © 2021 GLAMI Inspigroup s.r.o.
+  ~ @author       Kostadin Bashev (bashev@webcode.bg)
+  ~ @copyright    Copyright © 2021 Webcode Ltd. (https://webcode.bg/)
   ~ @license      See LICENSE.txt for license details.
   -->
 <csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">

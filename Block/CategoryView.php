@@ -10,10 +10,8 @@
 namespace Webcode\Glami\Block;
 
 use Exception;
-use Magento\Catalog\Api\Data\CategoryInterface;
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Catalog\Model\Category;
+use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Catalog\Model\Session;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -87,9 +85,9 @@ class CategoryView extends Pixel
         if ($this->getCurrentCategory()) {
             $itemIds = [];
 
-//        if ($this->currentCategory) {
-//            $itemIds[] = $this->currentCategory->getItems();
-//        }
+            //        if ($this->currentCategory) {
+            //            $itemIds[] = $this->currentCategory->getItems();
+            //        }
 
             // TODO: Add Products limited with page and filters (if applied)
 
