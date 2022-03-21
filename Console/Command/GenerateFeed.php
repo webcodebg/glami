@@ -44,12 +44,12 @@ class GenerateFeed extends Command
      */
     public function __construct(
         ProgressBarFactory $progressBarFactory,
-        GenerateFeedService $generateFeedService,
-        State $state
+        GenerateFeedService $generateFeedService//,
+        //State $state
     ) {
         $this->progressBarFactory = $progressBarFactory;
         $this->generateFeedService = $generateFeedService;
-        $this->state = $state;
+        // $this->state = $state;
         parent::__construct();
     }
 
@@ -76,13 +76,13 @@ class GenerateFeed extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        try {
-            $this->state->setAreaCode('adminhtml');
-        } catch (LocalizedException $e) {
-            $output->writeln($e->getMessage());
-
-            return Cli::RETURN_FAILURE;
-        }
+        // try {
+        //     $this->state->setAreaCode('adminhtml');
+        // } catch (LocalizedException $e) {
+        //     $output->writeln($e->getMessage());
+        //
+        //     return Cli::RETURN_FAILURE;
+        // }
 
         $progressBar = $this->progressBarFactory->create(['output' => $output]);
         $progressBar->setFormat('%current%/%max% [%bar%] %percent:3s%% %elapsed% %memory:6s%');
