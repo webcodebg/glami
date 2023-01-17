@@ -386,10 +386,14 @@ class Data extends AbstractHelper
      */
     public function getGlamiCategories(): array
     {
-        if (empty($this->glamiCategories)
-            && $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray()
-        ) {
-            $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
+        try {
+            if (empty($this->glamiCategories)
+                && $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray()
+            ) {
+                $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
+            }
+        } catch (Exception $e) {
+            return [];
         }
 
         return $this->glamiCategories;
