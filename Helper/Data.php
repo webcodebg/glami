@@ -18,6 +18,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Module\Dir;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\Xml\Parser;
@@ -82,6 +83,11 @@ class Data extends AbstractHelper
     private $directoryList;
 
     /**
+     * @var \Magento\Framework\Module\Dir
+     */
+    private Dir $moduleDir;
+
+    /**
      * Data constructor.
      *
      * @param CategoryRepositoryInterface $categoryRepository
@@ -89,6 +95,7 @@ class Data extends AbstractHelper
      * @param \Magento\Framework\Xml\Parser $parser
      * @param \Magento\Framework\Serialize\Serializer\Json $json
      * @param \Magento\Framework\App\Filesystem\DirectoryList $directoryList
+     * @param \Magento\Framework\Module\Dir $moduleDir
      * @param Context $context
      */
     public function __construct(
@@ -97,6 +104,7 @@ class Data extends AbstractHelper
         Parser $parser,
         Json $json,
         DirectoryList $directoryList,
+        Dir $moduleDir,
         Context $context
     ) {
         $this->categoryRepository = $categoryRepository;
@@ -104,6 +112,7 @@ class Data extends AbstractHelper
         $this->parser = $parser;
         $this->json = $json;
         $this->directoryList = $directoryList;
+        $this->moduleDir = $moduleDir;
         parent::__construct($context);
     }
 
@@ -122,7 +131,7 @@ class Data extends AbstractHelper
             $storeId = $this->storeManager->getStore()->getId();
         }
 
-        $field = self::MODULE_NAME . '/' . $field;
+        $field = self::MODULE_NAME . DIRECTORY_SEPARATOR . $field;
 
         return (string) $this->scopeConfig->getValue($field, ScopeInterface::SCOPE_STORE, $storeId);
     }
@@ -174,15 +183,14 @@ class Data extends AbstractHelper
         if (!$store) {
             $store = $this->getCurrentStore();
         }
-
-        if (!$store) {
+        /* @phpstan-ignore-next-line */
             $baseCurrencyCode = $store->getBaseCurrencyCode();
+        /* @phpstan-ignore-next-line */
             $currentCurrencyCode = $store->getCurrentCurrencyCode();
 
             if ($baseCurrencyCode !== $currentCurrencyCode) {
                 $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
             }
-        }
 
         return number_format($price, 2) . ($withCurrencyLabel === true ? (' ' . $currentCurrencyCode) : '');
     }
@@ -386,14 +394,15 @@ class Data extends AbstractHelper
      */
     public function getGlamiCategories(): array
     {
-        try {
-            if (empty($this->glamiCategories)
-                && $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray()
-            ) {
-                $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
+        if (empty($this->glamiCategories)) {
+            try {
+                $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray();
+            } catch (\Exception $e) {
+                $categoriesFile = $this->moduleDir->getDir('Webcode_Glami') . '/data/glami-categories.xml';
+                $categories = $this->parser->load($categoriesFile)->xmlToArray();
             }
-        } catch (Exception $e) {
-            return [];
+
+            $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
         }
 
         return $this->glamiCategories;
