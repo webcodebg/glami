@@ -398,11 +398,17 @@ class Data extends AbstractHelper
             try {
                 $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray();
             } catch (\Exception $e) {
-                $categoriesFile = $this->moduleDir->getDir('Webcode_Glami') . '/data/glami-categories.xml';
+                $categoriesFile = implode(DIRECTORY_SEPARATOR, [
+                    $this->moduleDir->getDir('Webcode_Glami'),
+                    'data',
+                    $this->getPixelLocale() . '-categories.xml'
+                ]);
                 $categories = $this->parser->load($categoriesFile)->xmlToArray();
             }
 
-            $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
+            if (isset($categories['GLAMI']['CATEGORY'])) {
+                $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
+            }
         }
 
         return $this->glamiCategories;
