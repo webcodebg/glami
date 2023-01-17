@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Block\Adminhtml\System\Config;
 
 use Magento\Catalog\Model\CategoryList;
@@ -58,6 +60,8 @@ class Category extends Select
     }
 
     /**
+     * Get list of Categories.
+     *
      * @return \Magento\Catalog\Api\Data\CategoryInterface[]
      * @throws \Magento\Framework\Exception\InputException
      */

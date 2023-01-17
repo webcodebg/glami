@@ -7,12 +7,13 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Block;
 
 use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Session;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -78,7 +79,8 @@ class ProductView extends Pixel
     }
 
     /**
-     * Get product detail info
+     * Get product detail info.
+     *
      * @throws Exception
      */
     public function assignEventData(): void
@@ -93,11 +95,14 @@ class ProductView extends Pixel
 
         $this->eventData = [
             'item_ids' => $itemIds,
-            'content_type' => 'product'
+            'content_type' => 'product',
+            'consent' => $this->getCookieConsent()
         ];
     }
 
     /**
+     * Get current product from session.
+     *
      * @return ProductInterface|bool
      */
     public function getCurrentProduct()
@@ -116,14 +121,16 @@ class ProductView extends Pixel
     }
 
     /**
-     * @return int|bool
+     * Get Product ID from session.
+     *
+     * @return int|null
      */
-    private function getProductId()
+    private function getProductId(): ?int
     {
-        if (!$this->productId && !$this->productId = (int)$this->catalogSession->getData('last_viewed_product_id')) {
-            return false;
+        if (!$this->productId && !$this->productId = $this->catalogSession->getData('last_viewed_product_id')) {
+            return null;
         }
 
-        return $this->productId;
+        return (int) $this->productId;
     }
 }

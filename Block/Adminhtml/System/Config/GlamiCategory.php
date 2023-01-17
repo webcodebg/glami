@@ -7,14 +7,12 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Block\Adminhtml\System\Config;
 
-use Magento\Catalog\Model\CategoryList;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Framework\View\Element\Context;
 use Magento\Framework\View\Element\Html\Select;
-use Magento\Framework\Xml\Parser;
 use Webcode\Glami\Helper\Data;
 
 /**
@@ -22,11 +20,6 @@ use Webcode\Glami\Helper\Data;
  */
 class GlamiCategory extends Select
 {
-    /**
-     * @var \Magento\Framework\Xml\Parser
-     */
-    private $parser;
-
     /**
      * @var \Webcode\Glami\Helper\Data
      */
@@ -49,6 +42,8 @@ class GlamiCategory extends Select
     }
 
     /**
+     * Check if can render Glami categories.
+     *
      * @return bool
      */
     public function canRenderCategories(): bool

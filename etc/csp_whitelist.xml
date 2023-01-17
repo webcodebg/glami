@@ -10,12 +10,12 @@
     <policies>
         <policy id="script-src">
             <values>
-                <value id="glami" type="host">*.glami.bg</value>
+                <value id="glamipixel" type="host">glamipixel.com</value>
             </values>
         </policy>
         <policy id="img-src">
             <values>
-                <value id="glami" type="host">*.glami.bg</value>
+                <value id="glami" type="host">glamipixel.com</value>
             </values>
         </policy>
     </policies>

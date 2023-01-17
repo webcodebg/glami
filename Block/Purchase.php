@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Block;
 
 use Exception;
@@ -52,7 +54,7 @@ class Purchase extends Pixel
         array $data = []
     ) {
         $this->checkoutSession = $checkoutSession;
-        $this->helper          = $helper;
+        $this->helper = $helper;
 
         $this->setEventName('Purchase');
         $this->assignEventData();
@@ -61,25 +63,27 @@ class Purchase extends Pixel
 
     /**
      * Get product detail info
+     *
      * @throws Exception
      */
     public function assignEventData(): void
     {
-        $order        = $this->checkoutSession->getLastRealOrder();
-        $itemIds      = [];
+        $order = $this->checkoutSession->getLastRealOrder();
+        $itemIds = [];
         $productNames = [];
 
         foreach ($order->getAllVisibleItems() as $item) {
-            $itemIds[]      = $item->getSku();
+            $itemIds[] = $item->getSku();
             $productNames[] = $item->getName();
         }
 
         $this->eventData = [
-            'item_ids'       => $itemIds,
-            'product_names'  => $productNames,
-            'value'          => $this->helper->formatPrice($order->getGrandTotal(), false),
-            'currency'       => $this->helper->getCurrentStoreCurrency(),
-            'transaction_id' => $order->getIncrementId()
+            'item_ids' => $itemIds,
+            'product_names' => $productNames,
+            'value' => $this->helper->formatPrice((float)$order->getGrandTotal(), false),
+            'currency' => $this->helper->getCurrentStoreCurrency(),
+            'transaction_id' => $order->getIncrementId(),
+            'consent' => $this->getCookieConsent()
         ];
     }
 }
