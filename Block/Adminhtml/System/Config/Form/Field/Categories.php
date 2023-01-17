@@ -80,12 +80,13 @@ class Categories extends AbstractFieldArray
             $categories[$category->getId()] = $path;
         }
 
+        $target = [];
         foreach ($arrayRows as $arrayRow) {
             if (isset($categories[$arrayRow->getSourceId()])) {
-                unset($categories[$arrayRow->getSourceId()]);
+                $target[$arrayRow->getSourceId()] = $arrayRow->getTarget();
             }
         }
-
+        $arrayRows = [];
         foreach ($categories as $categoryId => $categoryName) {
             if (!empty($categoryName)) {
                 $arrayRow = new DataObject();
@@ -94,11 +95,14 @@ class Categories extends AbstractFieldArray
                     '_id' => $rowId,
                     'source_id' => $categoryId,
                     'source' => $categoryName,
+                    'target' => $target[$categoryId] ?? null,
                     'column_values' => [
                         $rowId . '_source_id' => $categoryId,
                         $rowId . '_source' => $categoryName,
+                        $rowId . '_target' => $target[$categoryId] ?? null,
                     ],
                 ];
+
                 $arrayRow->setData($data);
                 $arrayRows[] = $arrayRow;
             }

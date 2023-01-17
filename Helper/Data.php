@@ -50,7 +50,7 @@ class Data extends AbstractHelper
     /**
      * Feed URL
      */
-    public const FEED_DIR = 'feed' . DIRECTORY_SEPARATOR . 'glami';
+    public const FEED_DIR = 'feed' . DIRECTORY_SEPARATOR;
 
     /**
      * @var StoreManagerInterface
@@ -231,9 +231,7 @@ class Data extends AbstractHelper
     public function getPixelLocale(): string
     {
         try {
-            if ($this->isActive()) {
-                return $this->getConfigData('general/locale');
-            }
+            return $this->getConfigData('general/locale');
         } catch (Exception $e) {
             $this->logger($e->getMessage());
         }
@@ -403,6 +401,7 @@ class Data extends AbstractHelper
                     'data',
                     $this->getPixelLocale() . '-categories.xml'
                 ]);
+
                 $categories = $this->parser->load($categoriesFile)->xmlToArray();
             }
 

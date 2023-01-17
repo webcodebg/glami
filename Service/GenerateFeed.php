@@ -196,7 +196,7 @@ class GenerateFeed
                         $this->progressBar->start();
                         $this->progressBar->clear();
                         $this->progressBar
-                            ->setMessage(__('Generating Feed for %1 store...', $store->getName())->getText());
+                            ->setMessage(__('Generating Feed for %1 store...', $store->getName())->render());
                     }
                     $this->generateFeed();
                     if ($this->hasProgressBar()) {
