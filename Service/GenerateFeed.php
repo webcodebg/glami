@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Service;
 
 use Magento\Catalog\Api\Data\ProductInterface;
@@ -19,7 +21,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Filesystem\DriverInterface;
+use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Simplexml\Element;
 use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
@@ -28,6 +30,7 @@ use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\OutputInterface;
 use Webcode\Glami\Helper\Data as Helper;
 
 /**
@@ -35,6 +38,7 @@ use Webcode\Glami\Helper\Data as Helper;
  * @SuppressWarnings(PHPMD.LongVariable)
  * @SuppressWarnings(PHPMD.ShortVariable)
  * @SuppressWarnings(PHPMD.TooManyFields)
+ * @SuppressWarnings(PHPMD.Complexcity)
  */
 class GenerateFeed
 {
@@ -85,15 +89,30 @@ class GenerateFeed
      */
     private $configurable;
 
-    private $store;
-
-    private $filesystemDriver;
-
+    /**
+     * @var ProgressBar
+     */
     private $progressBar;
 
+    /**
+     * @var Product
+     */
     private $product;
 
-    private $stockId;
+    /**
+     * @var array
+     */
+    private array $stockId = [];
+
+    /**
+     * @var \Magento\Store\Api\Data\StoreInterface
+     */
+    private StoreInterface $store;
+
+    /**
+     * @var \Magento\Framework\Filesystem
+     */
+    private Filesystem $filesystem;
 
     /**
      * Product Feed constructor.
@@ -106,8 +125,7 @@ class GenerateFeed
      * @param \Magento\InventorySalesApi\Api\StockResolverInterface $stockResolver
      * @param \Magento\InventorySalesApi\Api\AreProductsSalableInterface $areProductsSalable
      * @param Helper $helper
-     * @param DirectoryList $directoryList
-     * @param \Magento\Framework\Filesystem\DriverInterface $filesystemDriver
+     * @param \Magento\Framework\Filesystem $filesystem
      * @param File $file
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -121,7 +139,7 @@ class GenerateFeed
         StockResolverInterface $stockResolver,
         AreProductsSalableInterface $areProductsSalable,
         Helper $helper,
-        DriverInterface $filesystemDriver,
+        Filesystem $filesystem,
         File $file
     ) {
         $this->storeManager = $storeManager;
@@ -132,19 +150,13 @@ class GenerateFeed
         $this->stockResolver = $stockResolver;
         $this->areProductsSalable = $areProductsSalable;
         $this->helper = $helper;
-        $this->filesystemDriver = $filesystemDriver;
+        $this->filesystem = $filesystem;
         $this->file = $file;
     }
 
     /**
-     * @param \Symfony\Component\Console\Helper\ProgressBar $progressBar
-     */
-    public function setProgressBar(ProgressBar $progressBar): void
-    {
-        $this->progressBar = $progressBar;
-    }
-
-    /**
+     * Check for ProgressBar.
+     *
      * @return bool
      */
     public function hasProgressBar(): bool
@@ -153,6 +165,18 @@ class GenerateFeed
     }
 
     /**
+     * Set ProgressBar to Console.
+     *
+     * @param \Symfony\Component\Console\Helper\ProgressBar $progressBar
+     */
+    public function setProgressBar(ProgressBar $progressBar): void
+    {
+        $this->progressBar = $progressBar;
+    }
+
+    /**
+     * Execute Generate Feed Service
+     *
      * @param null $storeCode
      *
      * @return array
@@ -167,7 +191,17 @@ class GenerateFeed
                 && $this->helper->isActive($store->getId())
             ) {
                 try {
-                    $this->generateFeed($store);
+                    $this->store = $store;
+                    if ($this->hasProgressBar()) {
+                        $this->progressBar->start();
+                        $this->progressBar->clear();
+                        $this->progressBar
+                            ->setMessage(__('Generating Feed for %1 store...', $store->getName())->getText());
+                    }
+                    $this->generateFeed();
+                    if ($this->hasProgressBar()) {
+                        $this->progressBar->finish();
+                    }
                 } catch (FileSystemException $e) {
                     return ['success' => false, 'message' => $e->getMessage()];
                 }
@@ -180,8 +214,6 @@ class GenerateFeed
     /**
      * Genereate feed for every store.
      *
-     * @param StoreInterface $store
-     *
      * @return void
      *
      * @throws \Magento\Framework\Exception\FileSystemException
@@ -190,7 +222,7 @@ class GenerateFeed
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    protected function generateFeed(StoreInterface $store): void
+    protected function generateFeed(): void
     {
         $xml = new Element("<?xml version='1.0' encoding='UTF-8' standalone='yes'?><SHOP/>");
 
@@ -200,7 +232,8 @@ class GenerateFeed
         }
 
         foreach ($productsCollection as $product) {
-            if ($this->isProductAvailable($store, $product->getSku())) {
+            /** @var Product $product */
+            if ($this->isProductAvailable($product->getSku())) {
                 $this->product = $product;
 
                 $item = $xml->addChild('SHOPITEM');
@@ -208,7 +241,7 @@ class GenerateFeed
                 $item->addChild('ITEMGROUP_ID', $this->getProduct()->getSku());
                 $this->addChildWithCData($item, 'PRODUCTNAME', $product->getName());
 
-                if ($description = $product->getDescription()) {
+                if ($description = $product->getData('description')) {
                     $this->addChildWithCData($item, 'DESCRIPTION', $description);
                 }
 
@@ -231,25 +264,19 @@ class GenerateFeed
                 /* @phpstan-ignore-next-line */
                 $item->addChild('PRICE_VAT', $this->getProduct()->getFinalPrice());
 
-                $item->addChild('CATEGORYTEXT', $product->getFinalPrice());
-
-                if (($attributeCode = $this->helper->getAttributeCode('manufacturer')) &&
-                    !empty($attributeCode) && $attributeValue = $product->getAttributeText($attributeCode)) {
+                if ($attributeValue = $this->getAttributeValue($product, 'manufacturer')) {
                     $item->addChild('MANUFACTURER', $attributeValue);
                 }
 
-                if (($attributeCode = $this->helper->getAttributeCode('ean')) &&
-                    !empty($attributeCode) && $attributeValue = $product->getAttributeText($attributeCode)) {
+                if ($attributeValue = $this->getAttributeValue($product, 'ean')) {
                     $item->addChild('EAN', $attributeValue);
                 }
 
-                if (($attributeCode = $this->helper->getAttributeCode('glami_cpc')) &&
-                    !empty($attributeCode) && $attributeValue = $product->getAttributeText($attributeCode)) {
+                if ($attributeValue = $this->getAttributeValue($product, 'glami_cpc')) {
                     $item->addChild('GLAMI_CPC', $attributeValue);
                 }
 
-                if (($attributeCode = $this->helper->getAttributeCode('promotion_id')) &&
-                    !empty($attributeCode) && $attributeValue = $product->getAttributeText($attributeCode)) {
+                if ($attributeValue = $this->getAttributeValue($product, 'promotion_id')) {
                     $item->addChild('PROMOTION_ID', $attributeValue);
                 }
 
@@ -281,12 +308,14 @@ class GenerateFeed
         }
 
         $dir = $this->helper->getFeedPath();
-        if (!$this->filesystemDriver->isDirectory($dir) || $this->file->fileExists($dir)) {
-            $this->file->mkdir($dir, 0755);
-        }
+        $this->file->checkAndCreateFolder($dir, 0755);
 
-        $filename = $store->getCode() . '.xml';
-        $xml->saveXML($dir . $filename);
+        try {
+            $media = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
+            $media->writeFile($this->helper->getFeedPath(true), (string)$xml->asXML());
+        } catch (\Exception $e) {
+            $this->helper->logger($e->getMessage());
+        }
     }
 
     /**
@@ -294,16 +323,16 @@ class GenerateFeed
      *
      * @param int $page default 0
      *
-     * @return object
+     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getProductsCollection($page = 0): object
+    protected function getProductsCollection(int $page = 0): \Magento\Catalog\Model\ResourceModel\Product\Collection
     {
         $collection = $this->productCollection->create();
         $collection->addAttributeToSelect('*')->setStore($this->store);
         $collection->addAttributeToFilter('status', ['in' => $this->productStatus->getVisibleStatusIds()]);
         $collection->addMediaGalleryData();
-        $collection->addAttributeToFilter('is_saleable', 1);
+        $collection->addAttributeToFilter('is_saleable', ['eq' => 1]);
         $collection->addFinalPrice();
 
         // Set limits if $page is greater than 0
@@ -317,6 +346,8 @@ class GenerateFeed
     }
 
     /**
+     * Add Data to XML.
+     *
      * @param \SimpleXMLElement $element
      * @param string $name
      * @param string|null $value
@@ -325,35 +356,41 @@ class GenerateFeed
     {
         $child = $element->addChild($name);
         $dom = dom_import_simplexml($child);
-        $node = $dom->ownerDocument;
-        $dom->appendChild($node->createCDATASection($value));
+        if (!empty($dom)) {
+            $node = $dom->ownerDocument;
+            $dom->appendChild($node->createCDATASection($value));
+        }
     }
 
     /**
+     * Check product for parent products and return it.
+     *
      * @param int $childProductId
      *
-     * @return int|bool
+     * @return int
      */
-    private function getParentProductId(int $childProductId)
+    private function getParentProductId(int $childProductId): int
     {
         $parentConfigObject = $this->configurable->getParentIdsByChild($childProductId);
         if ($parentConfigObject) {
             return $parentConfigObject[0];
         }
 
-        return false;
+        return 0;
     }
 
     /**
+     * Get Visible Product.
+     *
      * @param bool $parent
      *
      * @return Product|ProductInterface
      */
-    private function getProduct($parent = true): ProductInterface
+    private function getProduct(bool $parent = true): ProductInterface
     {
         if ($parent && $parentProductId = $this->getParentProductId($this->product->getId())) {
             try {
-                return $this->productRepository->getById($parentProductId);
+                return $this->productRepository->getById($parentProductId, null, $this->store->getId());
             } catch (NoSuchEntityException $e) {
                 $this->helper->logger($e->getMessage());
 
@@ -365,6 +402,8 @@ class GenerateFeed
     }
 
     /**
+     * Get Stock for Current Store.
+     *
      * @param StoreInterface $store
      *
      * @return int
@@ -384,25 +423,42 @@ class GenerateFeed
     }
 
     /**
-     * @param StoreInterface $store
+     * Check Product availability
+     *
      * @param string $sku
      *
      * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function isProductAvailable(StoreInterface $store, string $sku): bool
+    private function isProductAvailable(string $sku): bool
     {
-        $stockId = $this->getStockIdByStore($store);
+        $stockId = $this->getStockIdByStore($this->store);
         $result = $this->areProductsSalable->execute([$sku], $stockId);
-        if (\is_array($result)) {
-            foreach ($result as $product) {
-                if ($product->getSku() === $sku) {
-                    return $product->isSalable();
-                }
+        foreach ($result as $product) {
+            if ($product->getSku() === $sku) {
+                return $product->isSalable();
             }
         }
 
         return false;
+    }
+
+    /**
+     * Get Attribute Value for product, based on attribute code.
+     *
+     * @param $product
+     * @param $code
+     *
+     * @return string|null
+     */
+    private function getAttributeValue($product, $code): ?string
+    {
+        if (($attributeCode = $this->helper->getAttributeCode($code))
+            && $attributeValue = $product->getAttributeText($attributeCode)) {
+            return $attributeValue;
+        }
+
+        return null;
     }
 }

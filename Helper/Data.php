@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Helper;
 
 use Exception;
@@ -47,7 +49,7 @@ class Data extends AbstractHelper
     /**
      * Feed URL
      */
-    public const FEED_DIR = 'feed' . DS . 'glami';
+    public const FEED_DIR = 'feed' . DIRECTORY_SEPARATOR . 'glami';
 
     /**
      * @var StoreManagerInterface
@@ -114,15 +116,15 @@ class Data extends AbstractHelper
      * @return string
      * @throws Exception
      */
-    public function getConfigData(string $field, $storeId = null): ?string
+    public function getConfigData(string $field, $storeId = null): string
     {
         if (!$storeId) {
             $storeId = $this->storeManager->getStore()->getId();
         }
 
-        $field = self::MODULE_NAME . DIRECTORY_SEPARATOR . $field;
+        $field = self::MODULE_NAME . '/' . $field;
 
-        return $this->scopeConfig->getValue($field, ScopeInterface::SCOPE_STORE, $storeId);
+        return (string) $this->scopeConfig->getValue($field, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     /**
@@ -152,10 +154,8 @@ class Data extends AbstractHelper
         try {
             return $this->storeManager->getStore();
         } catch (NoSuchEntityException $e) {
-            $this->logger($e->getMessage());
+            return null;
         }
-
-        return $this->storeManager->getDefaultStoreView();
     }
 
     /**
@@ -168,21 +168,23 @@ class Data extends AbstractHelper
      * @return string
      * @throws \Exception
      */
-    public function formatPrice(float $price, $withCurrencyLabel = true, Store $store = null): string
+    public function formatPrice(float $price, bool $withCurrencyLabel = true, Store $store = null): string
     {
+        $currentCurrencyCode = $this->getCurrentStoreCurrency();
         if (!$store) {
             $store = $this->getCurrentStore();
         }
-        /* @phpstan-ignore-next-line */
-        $baseCurrencyCode = $store->getBaseCurrencyCode();
-        /* @phpstan-ignore-next-line */
-        $currentCurrencyCode = $store->getCurrentCurrencyCode();
 
-        if ($baseCurrencyCode !== $currentCurrencyCode) {
-            $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
+        if (!$store) {
+            $baseCurrencyCode = $store->getBaseCurrencyCode();
+            $currentCurrencyCode = $store->getCurrentCurrencyCode();
+
+            if ($baseCurrencyCode !== $currentCurrencyCode) {
+                $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
+            }
         }
 
-        return number_format($price, 2) . $withCurrencyLabel ?? (' ' . $currentCurrencyCode);
+        return number_format($price, 2) . ($withCurrencyLabel === true ? (' ' . $currentCurrencyCode) : '');
     }
 
     /**
@@ -232,21 +234,27 @@ class Data extends AbstractHelper
     }
 
     /**
+     * Get list of attributes allowed to be exported in the feed.
+     *
      * @return array
      */
     public function getAllowedAttributes(): array
     {
-        $attributes = null;
         try {
             $attributes = $this->getConfigData('feed/attributes');
+            if (!empty($attributes)) {
+                return explode(',', $attributes);
+            }
         } catch (Exception $e) {
             $this->logger($e->getMessage());
         }
 
-        return explode(',', $attributes);
+        return [];
     }
 
     /**
+     * Get Attribute Code.
+     *
      * @param string $field
      *
      * @return string|null
@@ -263,6 +271,8 @@ class Data extends AbstractHelper
     }
 
     /**
+     * Get Magento Categories path.
+     *
      * @param CategoryInterface $category
      *
      * @return string
@@ -283,6 +293,11 @@ class Data extends AbstractHelper
         return implode(' | ', $categories);
     }
 
+    /**
+     * Get XML url to fetch categories for different countries.
+     *
+     * @return string
+     */
     private function getCategoriesUrl(): string
     {
         $urls = [
@@ -311,6 +326,8 @@ class Data extends AbstractHelper
     }
 
     /**
+     * Get Glami categories mapping.
+     *
      * @param array $productCategories
      *
      * @return string|null
@@ -340,6 +357,8 @@ class Data extends AbstractHelper
     }
 
     /**
+     * Append Child Categories to Glami Categories tree.
+     *
      * @param array $categories
      * @param array $options
      *
@@ -361,12 +380,14 @@ class Data extends AbstractHelper
     }
 
     /**
+     * Get full list of Glami categories.
+     *
      * @return array
      */
     public function getGlamiCategories(): array
     {
-        if (empty($this->glamiCategories) &&
-            $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray()
+        if (empty($this->glamiCategories)
+            && $categories = $this->parser->load($this->getCategoriesUrl())->xmlToArray()
         ) {
             $this->glamiCategories = $this->appendChildCategories($categories['GLAMI']['CATEGORY']);
         }
@@ -375,15 +396,33 @@ class Data extends AbstractHelper
     }
 
     /**
+     * Get Glami Feed Path.
+     *
+     * @param bool $withFilename
+     *
      * @return string
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function getFeedPath(): string
+    public function getFeedPath(bool $withFilename = false): string
     {
-        return $this->directoryList->getPath(DirectoryList::PUB) . DS . self::FEED_DIR . DS;
+        return $this->directoryList->getPath(DirectoryList::PUB) .
+               DIRECTORY_SEPARATOR . self::FEED_DIR . DIRECTORY_SEPARATOR .
+               ($withFilename === true ? $this->getFeedFilename() : '');
     }
 
     /**
+     * Get feed Filename based on store code.
+     *
+     * @return string
+     */
+    private function getFeedFilename(): string
+    {
+        return 'glami-' . $this->getCurrentStore()->getCode() . '.xml';
+    }
+
+    /**
+     * Get Feed URL to display in the admin configuration section.
+     *
      * @return string
      */
     public function getFeedUrl(): ?string
@@ -392,19 +431,22 @@ class Data extends AbstractHelper
             /* @phpstan-ignore-next-line */
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
             $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
-            return $baseUrl . self::FEED_DIR . DS . $store->getCode() . '.xml';
+
+            return $baseUrl . $this->getFeedFilename();
         }
 
         return null;
     }
 
     /**
+     * Get Logger.
+     *
      * @param string $message
      * @param string $type
      *
      * @return \Psr\Log\LoggerInterface
      */
-    public function logger(string $message, string $type = 'alert'): \Psr\Log\LoggerInterface
+    public function logger(string $message, string $type = 'alert'): ?\Psr\Log\LoggerInterface
     {
         return $this->_logger->{$type}(self::MODULE_NAME, ['message' => $message]);
     }

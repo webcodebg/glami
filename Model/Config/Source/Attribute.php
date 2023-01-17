@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Model\Config\Source;
 
 use Magento\Catalog\Model\Product\Attribute\Repository as AttributeRepository;
@@ -40,6 +42,8 @@ class Attribute
     }
 
     /**
+     * Options for attribute.
+     *
      * @return array
      */
     public function toOptionArray(): array

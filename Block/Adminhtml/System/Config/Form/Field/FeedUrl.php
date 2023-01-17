@@ -10,7 +10,6 @@
 namespace Webcode\Glami\Block\Adminhtml\System\Config\Form\Field;
 
 use Magento\Backend\Block\Template\Context;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\View\Helper\SecureHtmlRenderer;
 use Webcode\Glami\Helper\Data;
@@ -34,6 +33,7 @@ class FeedUrl extends \Magento\Config\Block\System\Config\Form\Field
 
     /**
      * @param Context $context
+     * @param \Webcode\Glami\Helper\Data $helper
      * @param array $data
      * @param SecureHtmlRenderer|null $secureRenderer
      */

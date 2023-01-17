@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\CustomerData;
 
 use Webcode\Glami\Model\Session;
@@ -19,6 +21,9 @@ class AddToCart implements SectionSourceInterface
      */
     protected $glamiSession;
 
+    /**
+     * @param \Webcode\Glami\Model\Session $glamiSession
+     */
     public function __construct(Session $glamiSession)
     {
         $this->glamiSession = $glamiSession;
@@ -29,7 +34,7 @@ class AddToCart implements SectionSourceInterface
      *
      * @return array
      */
-    public function getSectionData()
+    public function getSectionData(): array
     {
         $data = [];
         if ($this->glamiSession->hasAddToCartData()) {

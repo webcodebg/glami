@@ -7,13 +7,13 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Block;
 
 use Exception;
-use Magento\Catalog\Api\Data\CategoryInterface;
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Catalog\Model\Category;
+use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Catalog\Model\Session;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -48,8 +48,6 @@ class CategoryView extends Pixel
     private $categoryRepository;
 
     /**
-     * Constructor.
-     *
      * @param HelperData $helper
      * @param StoreManagerInterface $storeManager
      * @param Session $catalogSession
@@ -80,6 +78,7 @@ class CategoryView extends Pixel
 
     /**
      * Get product detail info
+     *
      * @throws Exception
      */
     public function assignEventData(): void
@@ -87,21 +86,24 @@ class CategoryView extends Pixel
         if ($this->getCurrentCategory()) {
             $itemIds = [];
 
-//        if ($this->currentCategory) {
-//            $itemIds[] = $this->currentCategory->getItems();
-//        }
+            //        if ($this->currentCategory) {
+            //            $itemIds[] = $this->currentCategory->getItems();
+            //        }
 
             // TODO: Add Products limited with page and filters (if applied)
 
             $this->eventData = [
                 'item_ids' => $itemIds,
                 'content_type' => 'category',
-                'category_text' => $this->helper->getCategoryPathName($this->getCurrentCategory())
+                'category_text' => $this->helper->getCategoryPathName($this->getCurrentCategory()),
+                'consent' => $this->getCookieConsent()
             ];
         }
     }
 
     /**
+     * Get Current Category from Session.
+     *
      * @return CategoryInterface|bool
      */
     public function getCurrentCategory()
@@ -120,6 +122,8 @@ class CategoryView extends Pixel
     }
 
     /**
+     * Get Category Id from session.
+     *
      * @return int|bool
      */
     private function getCategoryId()

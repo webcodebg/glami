@@ -12,11 +12,6 @@ This extension will allow you to generate the feed required to list your product
 ``` bash
 composer require webcode/module-glami
 ```
-#### Magento 2.3.x
-``` bash
-composer require webcode/module-glami:^103.0
-```
-
 ### Setup after get package
 ``` bash
 php bin/magento setup:upgrade
