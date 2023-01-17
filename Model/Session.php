@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Model;
 
 use Magento\Framework\Session\SessionManager;
@@ -14,11 +16,13 @@ use Magento\Framework\Session\SessionManager;
 class Session extends SessionManager
 {
     /**
-     * @param $data
+     * Set data in session for products added to cart
+     *
+     * @param array $data
      *
      * @return $this
      */
-    public function setAddToCartData($data): Session
+    public function setAddToCartData(array $data): Session
     {
         $this->setData('add_to_cart', $data);
 
@@ -26,11 +30,11 @@ class Session extends SessionManager
     }
 
     /**
-     * Get AddToCart Data
+     * Get AddToCart Data from session.
      *
      * @return mixed|null
      */
-    public function getAddToCartData()
+    public function getAddToCartData(): ?array
     {
         if ($this->hasAddToCartData()) {
             $data = $this->getData('add_to_cart');
@@ -47,7 +51,7 @@ class Session extends SessionManager
      *
      * @return bool
      */
-    public function hasAddToCartData()
+    public function hasAddToCartData(): bool
     {
         return $this->hasData('add_to_cart');
     }

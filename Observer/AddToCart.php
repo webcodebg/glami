@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Observer;
 
 use Exception;
@@ -28,7 +30,7 @@ class AddToCart implements ObserverInterface
     protected $glamiSession;
 
     /**
-     * ProductFactory
+     * Product
      *
      * @var ProductFactory
      */
@@ -40,17 +42,16 @@ class AddToCart implements ObserverInterface
     protected $configurable;
 
     /**
-     * Helper
+     * Glami Helper
      *
      * @var Data
      */
     protected $helper;
 
     /**
-     * AddToCart constructor.
-     *
      * @param Session $glamiSession
      * @param ProductFactory $productFactory
+     * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
      * @param Data $helper
      */
     public function __construct(
@@ -75,8 +76,8 @@ class AddToCart implements ObserverInterface
      */
     public function execute(Observer $observer): AddToCart
     {
-
         if ($this->helper->isActive()) {
+            /** @var \Magento\Catalog\Model\Product $product */
             $product = $observer->getData('product');
             $request = $observer->getData('request');
 

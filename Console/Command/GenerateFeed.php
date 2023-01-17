@@ -7,11 +7,11 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Console\Command;
 
-use Magento\Framework\App\State;
 use Magento\Framework\Console\Cli;
-use Magento\Framework\Exception\LocalizedException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBarFactory;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,25 +31,17 @@ class GenerateFeed extends Command
     private $generateFeedService;
 
     /**
-     * @var State
-     */
-    private $state;
-
-    /**
      * GenerateFeed constructor.
      *
      * @param \Symfony\Component\Console\Helper\ProgressBarFactory $progressBarFactory
      * @param \Webcode\Glami\Service\GenerateFeed $generateFeedService
-     * @param \Magento\Framework\App\State $state
      */
     public function __construct(
         ProgressBarFactory $progressBarFactory,
-        GenerateFeedService $generateFeedService//,
-        //State $state
+        GenerateFeedService $generateFeedService
     ) {
         $this->progressBarFactory = $progressBarFactory;
         $this->generateFeedService = $generateFeedService;
-        // $this->state = $state;
         parent::__construct();
     }
 
@@ -76,20 +68,12 @@ class GenerateFeed extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // try {
-        //     $this->state->setAreaCode('adminhtml');
-        // } catch (LocalizedException $e) {
-        //     $output->writeln($e->getMessage());
-        //
-        //     return Cli::RETURN_FAILURE;
-        // }
+        $output->writeln(__('<info>%1</info>', 'Start Generating Glami Feeds.'));
 
         $progressBar = $this->progressBarFactory->create(['output' => $output]);
-        $progressBar->setFormat('%current%/%max% [%bar%] %percent:3s%% %elapsed% %memory:6s%');
+        $progressBar->setFormat('%current%/%max% [%bar%] %percent:3s%% %elapsed% %memory:6s% | %message%');
+        $progressBar->setMessage('Preparing...');
 
-        $output->writeln(__('<info>%1</info>', 'Start Generating Glami Feed.'));
-
-        $progressBar->start();
         $this->generateFeedService->setProgressBar($progressBar);
         $this->generateFeedService->execute();
 

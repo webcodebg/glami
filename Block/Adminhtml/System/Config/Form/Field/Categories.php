@@ -28,6 +28,8 @@ class Categories extends AbstractFieldArray
     protected $_template = 'Webcode_Glami::system/config/form/field/array.phtml';
 
     /**
+     * Categories Renderer Block.
+     *
      * @return \Magento\Framework\View\Element\BlockInterface|object
      *
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -38,6 +40,8 @@ class Categories extends AbstractFieldArray
     }
 
     /**
+     * Single Category Renderer Block.
+     *
      * @return \Magento\Framework\View\Element\BlockInterface|object
      *
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -103,6 +107,11 @@ class Categories extends AbstractFieldArray
         return $arrayRows;
     }
 
+    /**
+     * Add Renreder
+     *
+     * @return void
+     */
     protected function _prepareToRender(): void
     {
         try {

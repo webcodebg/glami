@@ -7,6 +7,8 @@
  * @license      See LICENSE.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Webcode\Glami\Block;
 
 use Exception;
@@ -25,21 +27,21 @@ use Webcode\Glami\Helper\Data as HelperData;
 class Pixel extends Template
 {
     /**
-     * Event Name
+     * Name of the event.
      *
      * @var $this
      */
     public $eventName = null;
 
     /**
-     * EventData
+     * Data for the fired event.
      *
      * @var array
      */
     public $eventData;
 
     /**
-     * HelperData
+     * Helper class
      *
      * @var HelperData
      */
@@ -84,9 +86,9 @@ class Pixel extends Template
     /**
      * Set EventName
      *
-     * @param $name
+     * @param string $name
      */
-    public function setEventName($name)
+    public function setEventName(string $name)
     {
         $this->eventName = $name;
     }
@@ -132,6 +134,8 @@ class Pixel extends Template
     }
 
     /**
+     * Check is Pixel Enabled.
+     *
      * @return bool
      */
     public function isPixelEnabled(): bool
@@ -141,5 +145,15 @@ class Pixel extends Template
         } catch (Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Get Contest Parameter.
+     *
+     * @return int
+     */
+    public function getCookieConsent(): int
+    {
+        return 1;
     }
 }

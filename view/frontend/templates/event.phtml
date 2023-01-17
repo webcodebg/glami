@@ -17,6 +17,6 @@
 <?php else:?>
     <div data-role="glami-event" style="display:none;"></div>
     <script type="text/x-magento-init">
-        {"[data-role='glami-event']": {"Magento_Ui/js/core/app": <?= $block->getJsLayout() ?>}}
+        {"[data-role='glami-event']": {"Magento_Ui/js/core/app": <?= /** @noEscape */ $block->getJsLayout() ?>}}
     </script>
 <?php endif ?>
