@@ -231,14 +231,17 @@ class GenerateFeed
             $this->progressBar->setMaxSteps($productsCollection->getSize());
         }
 
+        $productsCollection->addMediaGalleryData();
+        $productsCollection->addFinalPrice();
+
         foreach ($productsCollection as $product) {
             /** @var Product $product */
             if ($this->isProductAvailable($product->getSku())) {
                 $this->product = $product;
 
                 $item = $xml->addChild('SHOPITEM');
-                $item->addChild('ITEM_ID', $product->getSku());
-                $item->addChild('ITEMGROUP_ID', $this->getProduct()->getSku());
+                $this->addChildWithCData($item, 'ITEM_ID', $product->getSku());
+                $this->addChildWithCData($item, 'ITEMGROUP_ID', $this->getProduct()->getSku());
                 $this->addChildWithCData($item, 'PRODUCTNAME', $product->getName());
 
                 if ($description = $product->getData('description')) {
@@ -246,9 +249,9 @@ class GenerateFeed
                 }
 
                 /* @phpstan-ignore-next-line */
-                $item->addChild('URL', $this->getProduct()->getProductUrl());
+                $this->addChildWithCData($item, 'URL', $this->getProduct()->getProductUrl());
                 /* @phpstan-ignore-next-line */
-                $item->addChild('URL_SIZE', $this->getProduct()->getProductUrl());
+                $this->addChildWithCData($item, 'URL_SIZE', $this->getProduct()->getProductUrl());
 
                 $images = $product->getMediaGalleryImages();
                 if ($images instanceof Collection) {
@@ -262,10 +265,10 @@ class GenerateFeed
                 }
 
                 /* @phpstan-ignore-next-line */
-                $item->addChild('PRICE_VAT', $this->getProduct()->getFinalPrice());
+                $item->addChild('PRICE_VAT', (string) $this->getProduct()->getFinalPrice());
 
                 if ($attributeValue = $this->getAttributeValue($product, 'manufacturer')) {
-                    $item->addChild('MANUFACTURER', $attributeValue);
+                    $this->addChildWithCData($item, 'MANUFACTURER', $attributeValue);
                 }
 
                 if ($attributeValue = $this->getAttributeValue($product, 'ean')) {
@@ -326,21 +329,12 @@ class GenerateFeed
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getProductsCollection(int $page = 0): \Magento\Catalog\Model\ResourceModel\Product\Collection
+    public function getProductsCollection(): \Magento\Catalog\Model\ResourceModel\Product\Collection
     {
         $collection = $this->productCollection->create();
         $collection->addAttributeToSelect('*')->setStore($this->store);
         $collection->addAttributeToFilter('status', ['in' => $this->productStatus->getVisibleStatusIds()]);
-        $collection->addMediaGalleryData();
         $collection->addAttributeToFilter('is_saleable', ['eq' => 1]);
-        $collection->addFinalPrice();
-
-        // Set limits if $page is greater than 0
-        if ($page > 0) {
-            $collection
-                ->setPageSize(self::COLLECTION_LIMIT)
-                ->setCurPage($page);
-        }
 
         return $collection;
     }
@@ -373,7 +367,7 @@ class GenerateFeed
     {
         $parentConfigObject = $this->configurable->getParentIdsByChild($childProductId);
         if ($parentConfigObject) {
-            return $parentConfigObject[0];
+            return (int) $parentConfigObject[0];
         }
 
         return 0;
@@ -388,7 +382,7 @@ class GenerateFeed
      */
     private function getProduct(bool $parent = true): ProductInterface
     {
-        if ($parent && $parentProductId = $this->getParentProductId($this->product->getId())) {
+        if ($parent && $parentProductId = $this->getParentProductId((int)$this->product->getId())) {
             try {
                 return $this->productRepository->getById($parentProductId, null, $this->store->getId());
             } catch (NoSuchEntityException $e) {
