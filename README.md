@@ -35,8 +35,8 @@ Stores - Configuration - Sales - Glami
 
 ## Generate Feed
 Feed location is one of these:
-``https://example.com/feed/glami/[store_code].xml``
-or ``https://example.com/pub/feed/glami/[store_code].xml``
+``https://example.com/feed/glami-[store_code].xml``
+or ``https://example.com/pub/feed/glami-[store_code].xml``
 where ``[store_code]`` = code of the store. Default value: default.
 
 Feed URL can be found here: Stores - Configuration - Sales - Glami - Feed
