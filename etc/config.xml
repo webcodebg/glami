@@ -13,6 +13,7 @@
         <glami>
             <general>
                 <enabled>0</enabled>
+                <locale>eco</locale>
             </general>
             <mapping>
                 <attributes>{"1":{"source":"size","target":"size"},"2":{"source":"color","target":"color"}}</attributes>
