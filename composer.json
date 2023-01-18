@@ -12,9 +12,6 @@
         "magento/module-ui": "^101.2",
         "magento/framework": "^103.0"
     },
-    "replace": {
-        "webcodebg/module-glami": "104.*"
-    },
     "license": [
         "OSL-3.0"
     ],
