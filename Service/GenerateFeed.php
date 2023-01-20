@@ -42,8 +42,6 @@ use Webcode\Glami\Helper\Data as Helper;
  */
 class GenerateFeed
 {
-    public const COLLECTION_LIMIT = 100;
-
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -284,9 +282,13 @@ class GenerateFeed
                 }
 
                 foreach ($this->helper->getAllowedAttributes() as $allowedAttribute) {
-                    if (!empty($attributeValue) && !$attributeValue = $product->getAttributeText($allowedAttribute)) {
+                    if (!empty($allowedAttribute) && !$attributeValue = $product->getAttributeText($allowedAttribute)) {
                         /* @phpstan-ignore-next-line */
                         $attributeValue = $this->getProduct()->getAttributeText($allowedAttribute);
+                    }
+
+                    if (is_string($attributeValue)) {
+                        $attributeValue = trim($attributeValue);
                     }
 
                     if (!empty($attributeValue)) {
