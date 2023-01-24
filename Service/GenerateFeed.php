@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Webcode\Glami\Service;
 
+use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
@@ -29,8 +30,8 @@ use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use SimpleXMLElement;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Output\OutputInterface;
 use Webcode\Glami\Helper\Data as Helper;
 
 /**
@@ -111,6 +112,10 @@ class GenerateFeed
      * @var \Magento\Framework\Filesystem
      */
     private Filesystem $filesystem;
+    /**
+     * @var \Magento\Catalog\Model\Product\Visibility
+     */
+    private Product\Visibility $productVisibility;
 
     /**
      * Product Feed constructor.
@@ -118,6 +123,7 @@ class GenerateFeed
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param ProductCollectionFactory $productCollectionFactory
      * @param ProductStatus $productStatus
+     * @param \Magento\Catalog\Model\Product\Visibility $productVisibility
      * @param ProductRepository $productRepository
      * @param Configurable $configurable
      * @param \Magento\InventorySalesApi\Api\StockResolverInterface $stockResolver
@@ -132,6 +138,7 @@ class GenerateFeed
         StoreManagerInterface $storeManager,
         ProductCollectionFactory $productCollectionFactory,
         ProductStatus $productStatus,
+        Product\Visibility $productVisibility,
         ProductRepository $productRepository,
         Configurable $configurable,
         StockResolverInterface $stockResolver,
@@ -143,6 +150,7 @@ class GenerateFeed
         $this->storeManager = $storeManager;
         $this->productCollection = $productCollectionFactory;
         $this->productStatus = $productStatus;
+        $this->productVisibility = $productVisibility;
         $this->productRepository = $productRepository;
         $this->configurable = $configurable;
         $this->stockResolver = $stockResolver;
@@ -175,12 +183,14 @@ class GenerateFeed
     /**
      * Execute Generate Feed Service
      *
-     * @param null $storeCode
+     * @param string|null $storeCode
      *
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Exception
      */
-    public function execute($storeCode = null): array
+    public function execute(string $storeCode = null): array
     {
         foreach ($this->storeManager->getStores() as $store) {
             /* @phpstan-ignore-next-line */
@@ -254,10 +264,11 @@ class GenerateFeed
                 $images = $product->getMediaGalleryImages();
                 if ($images instanceof Collection) {
                     foreach ($images as $image) {
-                        if ($product->getImage() !== $image->getFile()) {
-                            $item->addChild('IMGURL_ALTERNATIVE', $image->getUrl());
+                        /** @var \Magento\Framework\DataObject $image */
+                        if ($product->getImage() !== $image->getData('file')) {
+                            $item->addChild('IMGURL_ALTERNATIVE', $image->getData('url'));
                         } else {
-                            $item->addChild('IMGURL', $image->getUrl());
+                            $item->addChild('IMGURL', $image->getData('url'));
                         }
                     }
                 }
@@ -292,7 +303,7 @@ class GenerateFeed
                     }
 
                     if (!empty($attributeValue)) {
-                        if (\is_array($attributeValue)) {
+                        if (is_array($attributeValue)) {
                             $attributeValue = implode(', ', $attributeValue);
                         }
                         $attribute = $item->addChild('PARAM');
@@ -318,7 +329,7 @@ class GenerateFeed
         try {
             $media = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
             $media->writeFile($this->helper->getFeedPath(true), (string)$xml->asXML());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->helper->logger($e->getMessage());
         }
     }
@@ -326,16 +337,14 @@ class GenerateFeed
     /**
      * Get Products Collection
      *
-     * @param int $page default 0
-     *
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getProductsCollection(): \Magento\Catalog\Model\ResourceModel\Product\Collection
     {
         $collection = $this->productCollection->create();
         $collection->addAttributeToSelect('*')->setStore($this->store);
         $collection->addAttributeToFilter('status', ['in' => $this->productStatus->getVisibleStatusIds()]);
+        $collection->addAttributeToFilter('visibility', ['in' => $this->productVisibility->getVisibleInSiteIds()]);
         $collection->addAttributeToFilter('is_saleable', ['eq' => 1]);
 
         return $collection;
@@ -348,13 +357,13 @@ class GenerateFeed
      * @param string $name
      * @param string|null $value
      */
-    private function addChildWithCData(\SimpleXMLElement $element, string $name, ?string $value): void
+    private function addChildWithCData(SimpleXMLElement $element, string $name, ?string $value): void
     {
         $child = $element->addChild($name);
         $dom = dom_import_simplexml($child);
-        if (!empty($dom)) {
-            $node = $dom->ownerDocument;
-            $dom->appendChild($node->createCDATASection($value));
+        $node = $dom->ownerDocument;
+        if ($node) {
+            $dom->appendChild($node->createCDATASection((string) $value));
         }
     }
 
@@ -380,13 +389,17 @@ class GenerateFeed
      *
      * @param bool $parent
      *
-     * @return Product|ProductInterface
+     * @return \Magento\Catalog\Api\Data\ProductInterface
      */
     private function getProduct(bool $parent = true): ProductInterface
     {
-        if ($parent && $parentProductId = $this->getParentProductId((int)$this->product->getId())) {
+        if ($parent && $parentProductId = $this->getParentProductId($this->product->getId())) {
             try {
-                return $this->productRepository->getById($parentProductId, null, $this->store->getId());
+                $parentProduct = $this->productRepository->getById($parentProductId, false, $this->store->getId());
+                if (in_array($parentProduct->getStatus(), $this->productStatus->getVisibleStatusIds())
+                    && in_array($parentProduct->getVisibility(), $this->productVisibility->getVisibleInSiteIds())) {
+                    return $parentProduct;
+                }
             } catch (NoSuchEntityException $e) {
                 $this->helper->logger($e->getMessage());
 
@@ -443,16 +456,16 @@ class GenerateFeed
     /**
      * Get Attribute Value for product, based on attribute code.
      *
-     * @param $product
-     * @param $code
+     * @param Product $product
+     * @param string $code
      *
      * @return string|null
      */
-    private function getAttributeValue($product, $code): ?string
+    private function getAttributeValue($product, string $code): ?string
     {
         if (($attributeCode = $this->helper->getAttributeCode($code))
             && $attributeValue = $product->getAttributeText($attributeCode)) {
-            return $attributeValue;
+            return is_array($attributeValue) ? implode(',', $attributeValue) : $attributeValue;
         }
 
         return null;
