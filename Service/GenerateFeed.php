@@ -235,12 +235,12 @@ class GenerateFeed
         $xml = new Element("<?xml version='1.0' encoding='UTF-8' standalone='yes'?><SHOP/>");
 
         $productsCollection = $this->getProductsCollection();
+        $productsCollection->addMediaGalleryData();
+        $productsCollection->addFinalPrice();
+
         if ($this->hasProgressBar()) {
             $this->progressBar->setMaxSteps($productsCollection->getSize());
         }
-
-        $productsCollection->addMediaGalleryData();
-        $productsCollection->addFinalPrice();
 
         foreach ($productsCollection as $product) {
             /** @var Product $product */
