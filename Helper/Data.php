@@ -447,9 +447,7 @@ class Data extends AbstractHelper
     {
         if ($store = $this->getCurrentStore()) {
             /* @phpstan-ignore-next-line */
-            $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-            $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
-
+            $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
             return $baseUrl . self::FEED_DIR . $this->getFeedFilename();
         }
 
