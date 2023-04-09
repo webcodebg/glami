@@ -10,7 +10,7 @@ This extension will allow you to generate the feed required to list your product
 
 #### Magento 2.4.x (latest)
 ``` bash
-composer require webcode/module-glami
+composer require webcodebg/module-glami
 ```
 ### Setup after get package
 ``` bash
