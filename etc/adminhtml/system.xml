@@ -71,6 +71,19 @@
                     <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
                 </field>
 
+                <field id="size" translate="label comment tooltip" type="select" sortOrder="15" showInDefault="1" showInWebsite="1">
+                    <label>Size Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                </field>
+
+                <field id="size_system" translate="label comment tooltip" type="select" sortOrder="15" showInDefault="1" showInWebsite="1">
+                    <label>Size System Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                    <comment>
+                        <![CDATA[If leave it empty INT will be used.]]>
+                    </comment>
+                </field>
+
                 <field id="ean" translate="label comment tooltip" type="select" sortOrder="20" showInDefault="1" showInWebsite="1">
                     <label>EAN Attribute</label>
                     <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>

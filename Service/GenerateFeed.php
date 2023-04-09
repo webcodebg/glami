@@ -280,6 +280,16 @@ class GenerateFeed
                     $this->addChildWithCData($item, 'MANUFACTURER', $attributeValue);
                 }
 
+                if ($attributeValue = $this->getAttributeValue($product, 'size')) {
+                    $item->addChild('SIZE', $attributeValue);
+                }
+
+                if ($attributeValue = $this->getAttributeValue($product, 'size_system')) {
+                    $item->addChild('SIZE_SYSTEM', $attributeValue);
+                } else {
+                    $item->addChild('SIZE_SYSTEM', 'INT');
+                }
+
                 if ($attributeValue = $this->getAttributeValue($product, 'ean')) {
                     $item->addChild('EAN', $attributeValue);
                 }
@@ -293,9 +303,13 @@ class GenerateFeed
                 }
 
                 foreach ($this->helper->getAllowedAttributes() as $allowedAttribute) {
-                    if (!empty($allowedAttribute) && !$attributeValue = $product->getAttributeText($allowedAttribute)) {
-                        /* @phpstan-ignore-next-line */
-                        $attributeValue = $this->getProduct()->getAttributeText($allowedAttribute);
+                    if (empty($allowedAttribute)) {
+                        continue;
+                    }
+
+                    $attributeValue = $this->getAttributeValue($product, $allowedAttribute, true);
+                    if (empty($attributeValue)) {
+                        $attributeValue = $this->getAttributeValue($this->getProduct(), $allowedAttribute, true);
                     }
 
                     if (is_string($attributeValue)) {
@@ -303,9 +317,6 @@ class GenerateFeed
                     }
 
                     if (!empty($attributeValue)) {
-                        if (is_array($attributeValue)) {
-                            $attributeValue = implode(', ', $attributeValue);
-                        }
                         $attribute = $item->addChild('PARAM');
                         $attribute->addChild('PARAM_NAME', $allowedAttribute);
                         $this->addChildWithCData($attribute, 'VALUE', $attributeValue);
@@ -456,16 +467,25 @@ class GenerateFeed
     /**
      * Get Attribute Value for product, based on attribute code.
      *
-     * @param Product $product
+     * @param $product
      * @param string $code
-     *
+     * @param bool $isAttributeCode
      * @return string|null
      */
-    private function getAttributeValue($product, string $code): ?string
+    private function getAttributeValue($product, string $code, bool $isAttributeCode = false): ?string
     {
-        if (($attributeCode = $this->helper->getAttributeCode($code))
-            && $attributeValue = $product->getAttributeText($attributeCode)) {
-            return is_array($attributeValue) ? implode(',', $attributeValue) : $attributeValue;
+        if ($isAttributeCode) {
+            $attributeCode = $code;
+        } else {
+            $attributeCode = $this->helper->getAttributeCode($code);
+        }
+
+        if (!empty($attributeCode)) {
+            if (!$attributeValue = $product->getAttributeText($attributeCode)) {
+                $attributeValue = $product->getData($attributeCode);
+            }
+
+            return is_array($attributeValue) ? implode(',', $attributeValue) : (string) $attributeValue;
         }
 
         return null;

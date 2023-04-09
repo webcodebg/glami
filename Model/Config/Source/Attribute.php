@@ -51,9 +51,7 @@ class Attribute
         $options = [['value' => '', 'label' => '']];
         $attributes = $this->attributeRepository->getList($this->searchCriteriaBuilder->create())->getItems();
         foreach ($attributes as $attribute) {
-            if ((int)$attribute->getIsUserDefined() === 1 &&
-                \in_array($attribute->getFrontendInput(), ['select', 'multiselect'])
-            ) {
+            if ((int)$attribute->getIsUserDefined() === 1) {
                 $options[] = [
                     'value' => $attribute->getAttributeCode(),
                     'label' => $attribute->getDefaultFrontendLabel()
