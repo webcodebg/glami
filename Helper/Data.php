@@ -450,7 +450,7 @@ class Data extends AbstractHelper
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
             $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
 
-            return $baseUrl . $this->getFeedFilename();
+            return $baseUrl . self::FEED_DIR . $this->getFeedFilename();
         }
 
         return null;
