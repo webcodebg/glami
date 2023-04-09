@@ -99,7 +99,7 @@ class GenerateFeed
     private $product;
 
     /**
-     * @var array
+     * @var int[]
      */
     private array $stockId = [];
 
@@ -181,7 +181,7 @@ class GenerateFeed
     }
 
     /**
-     * Execute Generate Feed Service
+     * Execute Generate Feed Service.
      *
      * @param string|null $storeCode
      *
@@ -282,12 +282,12 @@ class GenerateFeed
 
                 if ($attributeValue = $this->getAttributeValue($product, 'size')) {
                     $item->addChild('SIZE', $attributeValue);
-                }
 
-                if ($attributeValue = $this->getAttributeValue($product, 'size_system')) {
-                    $item->addChild('SIZE_SYSTEM', $attributeValue);
-                } else {
-                    $item->addChild('SIZE_SYSTEM', 'INT');
+                    if ($attributeValue = $this->getAttributeValue($product, 'size_system')) {
+                        $item->addChild('SIZE_SYSTEM', $attributeValue);
+                    } else {
+                        $item->addChild('SIZE_SYSTEM', 'INT');
+                    }
                 }
 
                 if ($attributeValue = $this->getAttributeValue($product, 'ean')) {
@@ -346,7 +346,7 @@ class GenerateFeed
     }
 
     /**
-     * Get Products Collection
+     * Get Products Collection.
      *
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
@@ -355,7 +355,6 @@ class GenerateFeed
         $collection = $this->productCollection->create();
         $collection->addAttributeToSelect('*')->setStore($this->store);
         $collection->addAttributeToFilter('status', ['in' => $this->productStatus->getVisibleStatusIds()]);
-        $collection->addAttributeToFilter('visibility', ['in' => $this->productVisibility->getVisibleInSiteIds()]);
         $collection->addAttributeToFilter('is_saleable', ['eq' => 1]);
 
         return $collection;
@@ -404,7 +403,7 @@ class GenerateFeed
      */
     private function getProduct(bool $parent = true): ProductInterface
     {
-        if ($parent && $parentProductId = $this->getParentProductId($this->product->getId())) {
+        if ($parent && $parentProductId = $this->getParentProductId((int) $this->product->getId())) {
             try {
                 $parentProduct = $this->productRepository->getById($parentProductId, false, $this->store->getId());
                 if (in_array($parentProduct->getStatus(), $this->productStatus->getVisibleStatusIds())
@@ -443,7 +442,7 @@ class GenerateFeed
     }
 
     /**
-     * Check Product availability
+     * Check Product availability.
      *
      * @param string $sku
      *
@@ -467,7 +466,7 @@ class GenerateFeed
     /**
      * Get Attribute Value for product, based on attribute code.
      *
-     * @param $product
+     * @param Product $product
      * @param string $code
      * @param bool $isAttributeCode
      * @return string|null

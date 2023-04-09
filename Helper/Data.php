@@ -179,18 +179,19 @@ class Data extends AbstractHelper
      */
     public function formatPrice(float $price, bool $withCurrencyLabel = true, Store $store = null): string
     {
-        $currentCurrencyCode = $this->getCurrentStoreCurrency();
         if (!$store) {
             $store = $this->getCurrentStore();
         }
-        /* @phpstan-ignore-next-line */
-            $baseCurrencyCode = $store->getBaseCurrencyCode();
-        /* @phpstan-ignore-next-line */
-            $currentCurrencyCode = $store->getCurrentCurrencyCode();
 
-            if ($baseCurrencyCode !== $currentCurrencyCode) {
-                $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
-            }
+        /* @phpstan-ignore-next-line */
+        $baseCurrencyCode = $store->getBaseCurrencyCode();
+
+        /* @phpstan-ignore-next-line */
+        $currentCurrencyCode = $store->getCurrentCurrencyCode();
+
+        if ($baseCurrencyCode !== $currentCurrencyCode) {
+            $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
+        }
 
         return number_format($price, 2) . ($withCurrencyLabel === true ? (' ' . $currentCurrencyCode) : '');
     }
@@ -447,10 +448,7 @@ class Data extends AbstractHelper
     {
         if ($store = $this->getCurrentStore()) {
             /* @phpstan-ignore-next-line */
-            $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-            $baseUrl = str_replace(UrlInterface::URL_TYPE_MEDIA . '/', '', $baseUrl);
-
-            return $baseUrl . self::FEED_DIR . $this->getFeedFilename();
+            return $store->getBaseUrl(UrlInterface::URL_TYPE_WEB) . self::FEED_DIR . $this->getFeedFilename();
         }
 
         return null;

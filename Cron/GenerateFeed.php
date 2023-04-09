@@ -18,6 +18,9 @@ class GenerateFeed
      */
     private $generateFeed;
 
+    /**
+     * @param \Webcode\Glami\Service\GenerateFeed $generateFeed
+     */
     public function __construct(\Webcode\Glami\Service\GenerateFeed $generateFeed)
     {
         $this->generateFeed = $generateFeed;
