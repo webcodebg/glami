@@ -127,7 +127,7 @@ class GenerateFeed
      * @param ProductStatus $productStatus
      * @param \Magento\InventorySalesApi\Api\StockResolverInterface $stockResolver
      * @param \Magento\InventorySalesApi\Api\AreProductsSalableInterface $areProductsSalable
-     * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
+     * @param \Magento\ConfigurableProduct\Model\Product\Type\ConfigurableFactory $configurableFactory
      * @param ProductRepositoryInterface $productRepository
      * @param \Magento\Catalog\Model\Product\Visibility $productVisibility
      * @param \Magento\Framework\Filesystem $filesystem
