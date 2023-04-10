@@ -13,11 +13,11 @@ namespace Webcode\Glami\Service;
 
 use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
-use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
-use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\ConfigurableProduct\Model\Product\Type\ConfigurableFactory;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\Exception\FileSystemException;
@@ -46,62 +46,12 @@ class GenerateFeed
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
-    private $storeManager;
+    private StoreManagerInterface $storeManager;
 
     /**
      * @var \Webcode\Glami\Helper\Data
      */
-    private $helper;
-
-    /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
-     */
-    private $productCollection;
-
-    /**
-     * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
-     */
-    private $productStatus;
-
-    /**
-     * @var \Magento\Catalog\Model\ProductRepository
-     */
-    private $productRepository;
-
-    /**
-     * @var \Magento\InventorySalesApi\Api\StockResolverInterface
-     */
-    private $stockResolver;
-
-    /**
-     * @var \Magento\InventorySalesApi\Api\AreProductsSalableInterface
-     */
-    private $areProductsSalable;
-
-    /**
-     * @var \Magento\Framework\Filesystem\Io\File
-     */
-    private $file;
-
-    /**
-     * @var Configurable
-     */
-    private $configurable;
-
-    /**
-     * @var ProgressBar
-     */
-    private $progressBar;
-
-    /**
-     * @var Product
-     */
-    private $product;
-
-    /**
-     * @var int[]
-     */
-    private array $stockId = [];
+    private Helper $helper;
 
     /**
      * @var \Magento\Store\Api\Data\StoreInterface
@@ -109,26 +59,77 @@ class GenerateFeed
     private StoreInterface $store;
 
     /**
-     * @var \Magento\Framework\Filesystem
+     * @var ProgressBar|null
      */
-    private Filesystem $filesystem;
+    private ?ProgressBar $progressBar = null;
+
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
+     */
+    private ProductCollectionFactory $productCollection;
+
+    /**
+     * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
+     */
+    private ProductStatus $productStatus;
+
+    /**
+     * @var \Magento\InventorySalesApi\Api\StockResolverInterface
+     */
+    private StockResolverInterface $stockResolver;
+
+    /**
+     * @var int[]
+     */
+    private array $stockId = [];
+
+    /**
+     * @var \Magento\InventorySalesApi\Api\AreProductsSalableInterface
+     */
+    private AreProductsSalableInterface $areProductsSalable;
+
+    /**
+     * @var \Magento\Catalog\Model\Product
+     */
+    private Product $product;
+
+    /**
+     * @var \Magento\ConfigurableProduct\Model\Product\Type\ConfigurableFactory
+     */
+    private ConfigurableFactory $configurableFactory;
+
+    /**
+     * @var \Magento\Catalog\Api\ProductRepositoryInterface
+     */
+    private ProductRepositoryInterface $productRepository;
+
     /**
      * @var \Magento\Catalog\Model\Product\Visibility
      */
     private Product\Visibility $productVisibility;
 
     /**
+     * @var \Magento\Framework\Filesystem
+     */
+    private Filesystem $filesystem;
+
+    /**
+     * @var \Magento\Framework\Filesystem\Io\File
+     */
+    private File $file;
+
+    /**
      * Product Feed constructor.
      *
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param Helper $helper
      * @param ProductCollectionFactory $productCollectionFactory
      * @param ProductStatus $productStatus
-     * @param \Magento\Catalog\Model\Product\Visibility $productVisibility
-     * @param ProductRepository $productRepository
-     * @param Configurable $configurable
      * @param \Magento\InventorySalesApi\Api\StockResolverInterface $stockResolver
      * @param \Magento\InventorySalesApi\Api\AreProductsSalableInterface $areProductsSalable
-     * @param Helper $helper
+     * @param \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable
+     * @param ProductRepositoryInterface $productRepository
+     * @param \Magento\Catalog\Model\Product\Visibility $productVisibility
      * @param \Magento\Framework\Filesystem $filesystem
      * @param File $file
      *
@@ -136,38 +137,28 @@ class GenerateFeed
      */
     public function __construct(
         StoreManagerInterface $storeManager,
+        Helper $helper,
         ProductCollectionFactory $productCollectionFactory,
         ProductStatus $productStatus,
-        Product\Visibility $productVisibility,
-        ProductRepository $productRepository,
-        Configurable $configurable,
         StockResolverInterface $stockResolver,
         AreProductsSalableInterface $areProductsSalable,
-        Helper $helper,
+        ConfigurableFactory $configurableFactory,
+        ProductRepositoryInterface $productRepository,
+        Product\Visibility $productVisibility,
         Filesystem $filesystem,
         File $file
     ) {
         $this->storeManager = $storeManager;
+        $this->helper = $helper;
         $this->productCollection = $productCollectionFactory;
         $this->productStatus = $productStatus;
-        $this->productVisibility = $productVisibility;
-        $this->productRepository = $productRepository;
-        $this->configurable = $configurable;
         $this->stockResolver = $stockResolver;
         $this->areProductsSalable = $areProductsSalable;
-        $this->helper = $helper;
+        $this->configurableFactory = $configurableFactory;
+        $this->productRepository = $productRepository;
+        $this->productVisibility = $productVisibility;
         $this->filesystem = $filesystem;
         $this->file = $file;
-    }
-
-    /**
-     * Check for ProgressBar.
-     *
-     * @return bool
-     */
-    public function hasProgressBar(): bool
-    {
-        return $this->progressBar instanceof ProgressBar;
     }
 
     /**
@@ -200,14 +191,14 @@ class GenerateFeed
             ) {
                 try {
                     $this->store = $store;
-                    if ($this->hasProgressBar()) {
+                    if ($this->progressBar instanceof ProgressBar) {
                         $this->progressBar->start();
                         $this->progressBar->clear();
                         $this->progressBar
                             ->setMessage(__('Generating Feed for %1 store...', $store->getName())->render());
                     }
                     $this->generateFeed();
-                    if ($this->hasProgressBar()) {
+                    if ($this->progressBar instanceof ProgressBar) {
                         $this->progressBar->finish();
                     }
                 } catch (FileSystemException $e) {
@@ -238,7 +229,7 @@ class GenerateFeed
         $productsCollection->addMediaGalleryData();
         $productsCollection->addFinalPrice();
 
-        if ($this->hasProgressBar()) {
+        if ($this->progressBar instanceof ProgressBar) {
             $this->progressBar->setMaxSteps($productsCollection->getSize());
         }
 
@@ -329,7 +320,7 @@ class GenerateFeed
                 }
             }
 
-            if ($this->hasProgressBar()) {
+            if ($this->progressBar instanceof ProgressBar) {
                 $this->progressBar->advance();
             }
         }
@@ -338,8 +329,8 @@ class GenerateFeed
         $this->file->checkAndCreateFolder($dir, 0755);
 
         try {
-            $media = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
-            $media->writeFile($this->helper->getFeedPath(true), (string)$xml->asXML());
+            $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
+            $pub->writeFile($this->helper->getFeedPath(true), (string)$xml->asXML());
         } catch (Exception $e) {
             $this->helper->logger($e->getMessage());
         }
@@ -386,9 +377,13 @@ class GenerateFeed
      */
     private function getParentProductId(int $childProductId): int
     {
-        $parentConfigObject = $this->configurable->getParentIdsByChild($childProductId);
+        try {
+            $parentConfigObject = $this->configurableFactory->create()->getParentIdsByChild($childProductId);
         if ($parentConfigObject) {
             return (int) $parentConfigObject[0];
+        }
+        } catch (Exception $e) {
+            return 0;
         }
 
         return 0;
@@ -397,13 +392,11 @@ class GenerateFeed
     /**
      * Get Visible Product.
      *
-     * @param bool $parent
-     *
      * @return \Magento\Catalog\Api\Data\ProductInterface
      */
-    private function getProduct(bool $parent = true): ProductInterface
+    private function getProduct(): ProductInterface
     {
-        if ($parent && $parentProductId = $this->getParentProductId((int) $this->product->getId())) {
+        if ($parentProductId = $this->getParentProductId((int) $this->product->getId())) {
             try {
                 $parentProduct = $this->productRepository->getById($parentProductId, false, $this->store->getId());
                 if (in_array($parentProduct->getStatus(), $this->productStatus->getVisibleStatusIds())
@@ -438,7 +431,7 @@ class GenerateFeed
             $this->stockId[$storeId] = (int)$stock->getStockId();
         }
 
-        return (int)$this->stockId[$storeId];
+        return $this->stockId[$storeId] ?? 0;
     }
 
     /**

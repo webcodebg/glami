@@ -18,8 +18,6 @@
     </type>
     <type name="Webcode\Glami\Console\Command\GenerateFeed">
         <arguments>
-            <argument name="state" xsi:type="object">Magento\Framework\App\State\Proxy</argument>
-            <argument name="area" xsi:type="object">Magento\Framework\App\Area\Proxy</argument>
             <argument name="glamiServiceGenerateFeed" xsi:type="object">Webcode\Glami\Service\GenerateFeed\Proxy</argument>
         </arguments>
     </type>
