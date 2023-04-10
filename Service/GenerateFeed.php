@@ -218,6 +218,7 @@ class GenerateFeed
      * @throws \Magento\Framework\Exception\FileSystemException
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Exception
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
@@ -233,6 +234,10 @@ class GenerateFeed
             $this->progressBar->setMaxSteps($productsCollection->getSize());
         }
 
+        $categoryMapping = $this->helper->getConfigData('feed/categories_attribute_enabled');
+        $categoryAttribute = $this->helper->getConfigData('feed/category_attribute');
+        $defaultSizeSystem = $this->helper->getConfigData('feed/size_system');
+
         foreach ($productsCollection as $product) {
             /** @var Product $product */
             if ($this->isProductAvailable($product->getSku())) {
@@ -247,10 +252,15 @@ class GenerateFeed
                     $this->addChildWithCData($item, 'DESCRIPTION', $description);
                 }
 
+                $url = $this->getProduct()->getProductUrl();
+                if ($utmParams = $this->helper->getUtmTracking()) {
+                    $url .= (strpos($url, '?') === false ? '?' : '&') . $utmParams;
+                }
+
                 /* @phpstan-ignore-next-line */
-                $this->addChildWithCData($item, 'URL', $this->getProduct()->getProductUrl());
+                $this->addChildWithCData($item, 'URL', $url);
                 /* @phpstan-ignore-next-line */
-                $this->addChildWithCData($item, 'URL_SIZE', $this->getProduct()->getProductUrl());
+                $this->addChildWithCData($item, 'URL_SIZE', $url);
 
                 $images = $product->getMediaGalleryImages();
                 if ($images instanceof Collection) {
@@ -273,12 +283,6 @@ class GenerateFeed
 
                 if ($attributeValue = $this->getAttributeValue($product, 'size')) {
                     $item->addChild('SIZE', $attributeValue);
-
-                    if ($attributeValue = $this->getAttributeValue($product, 'size_system')) {
-                        $item->addChild('SIZE_SYSTEM', $attributeValue);
-                    } else {
-                        $item->addChild('SIZE_SYSTEM', 'INT');
-                    }
                 }
 
                 if ($attributeValue = $this->getAttributeValue($product, 'ean')) {
@@ -293,6 +297,7 @@ class GenerateFeed
                     $item->addChild('PROMOTION_ID', $attributeValue);
                 }
 
+                $sizeSystemExists = false;
                 foreach ($this->helper->getAllowedAttributes() as $allowedAttribute) {
                     if (empty($allowedAttribute)) {
                         continue;
@@ -311,15 +316,27 @@ class GenerateFeed
                         $attribute = $item->addChild('PARAM');
                         $attribute->addChild('PARAM_NAME', $allowedAttribute);
                         $this->addChildWithCData($attribute, 'VALUE', $attributeValue);
+                        if ($allowedAttribute == 'size_system') {
+                            $sizeSystemExists = true;
+                        }
                     }
                 }
 
+                if (!$sizeSystemExists && !empty($defaultSizeSystem)) {
+                    $attribute = $item->addChild('PARAM');
+                    $attribute->addChild('PARAM_NAME', 'size_system');
+                    $this->addChildWithCData($attribute, 'VALUE', $defaultSizeSystem);
+                }
+
                 /* @phpstan-ignore-next-line */
-                if ($category = $this->helper->getGlamiCategory($this->getProduct()->getCategoryIds())) {
+                if (!$categoryMapping &&
+                    $category = $this->helper->getGlamiCategory($this->getProduct()->getCategoryIds())) {
+                    $item->addChild('CATEGORYTEXT', $category);
+                } elseif ($categoryMapping && !empty($categoryAttribute)) {
+                    $category = $this->getAttributeValue($this->getProduct(), $categoryAttribute, true);
                     $item->addChild('CATEGORYTEXT', $category);
                 }
             }
-
             if ($this->progressBar instanceof ProgressBar) {
                 $this->progressBar->advance();
             }

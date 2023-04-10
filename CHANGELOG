@@ -4,5 +4,8 @@
 104.0.3 Add additional checks, conform with magento codding standards
 104.0.4 Fix AddToCart and Purchase Product IDs
 104.1.0 Add Consent logic, Add parent images as child images. Add Fallback categories. Fix issues.
-104.1.1 Added Size & Size System to configuration settings. Improved logic to getting values of attributes.
-104.1.2 Add compatibility with Adobe (Magento) marketplace.
+104.1.1 Added Size & Size System to configuration settings. Improved logic to getting values of attributes. Add compatibility with Adobe (Magento) marketplace.
+104.1.2
+   - Added Default Size System.
+   - Added option to choose way to deliver categories to GLAMI.
+   - Added option to add Google Analytics UTM Parameters to urls.

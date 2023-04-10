@@ -15,12 +15,15 @@
                 <enabled>0</enabled>
                 <locale>eco</locale>
             </general>
-            <mapping>
-                <attributes>{"1":{"source":"size","target":"size"},"2":{"source":"color","target":"color"}}</attributes>
-            </mapping>
             <feed>
+                <manufacturer>manufacturer</manufacturer>
+                <size>size</size>
                 <cron>55 * * * *</cron>
             </feed>
+            <tracking>
+                <enabled>0</enabled>
+                <utm_source>glami</utm_source>
+            </tracking>
         </glami>
     </default>
 </config>
