@@ -379,9 +379,9 @@ class GenerateFeed
     {
         try {
             $parentConfigObject = $this->configurableFactory->create()->getParentIdsByChild($childProductId);
-        if ($parentConfigObject) {
+            if ($parentConfigObject) {
             return (int) $parentConfigObject[0];
-        }
+            }
         } catch (Exception $e) {
             return 0;
         }
