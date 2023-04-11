@@ -33,7 +33,7 @@ $_htmlId = $block->getHtmlId() ?: '_' . uniqid('', true);
                        name="groups[feed][fields][categories][value][<?= $escaper->escapeHtml($_rowId) ?>][source_id]"
                            value="<?= $escaper->escapeHtml($_row->getData('source_id')) ?>"
                            readonly="readonly"/>
-                        <span class="input read-only"><?=$_row->getData('source') ?></span>
+                        <span class="input read-only"><?= $escaper->escapeHtml($_row->getData('source')) ?></span>
                     </td>
                     <td>
                         <?= /* @noEscape */

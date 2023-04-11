@@ -17,9 +17,7 @@
             <label>Glami</label>
             <resource>Webcode_Glami::glami_config</resource>
 
-            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1"
-                   showInWebsite="1"
-                   showInStore="1">
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Glami piXel</label>
                 <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -27,9 +25,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
 
-                <field id="pixel_id" translate="label tooltip" type="text" sortOrder="15" showInDefault="1"
-                       showInWebsite="1"
-                       showInStore="1">
+                <field id="pixel_id" translate="label tooltip" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Glami API Key</label>
                     <depends>
                         <field id="pixel_enabled">1</field>
@@ -37,9 +33,7 @@
                     <validate>required-entry</validate>
                 </field>
 
-                <field id="locale" translate="label tooltip" type="select" sortOrder="15" showInDefault="1"
-                       showInWebsite="1"
-                       showInStore="1">
+                <field id="locale" translate="label tooltip" type="select" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Locale</label>
                     <depends>
                         <field id="pixel_enabled">1</field>
@@ -71,17 +65,14 @@
                     <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
                 </field>
 
-                <field id="size" translate="label comment tooltip" type="select" sortOrder="15" showInDefault="1" showInWebsite="1">
+                <field id="size" translate="label comment tooltip" type="select" sortOrder="17" showInDefault="1" showInWebsite="1">
                     <label>Size Attribute</label>
                     <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
                 </field>
 
-                <field id="size_system" translate="label comment tooltip" type="select" sortOrder="15" showInDefault="1" showInWebsite="1">
-                    <label>Size System Attribute</label>
-                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
-                    <comment>
-                        <![CDATA[If leave it empty INT will be used.]]>
-                    </comment>
+                <field id="size_system" translate="label comment tooltip" type="select" sortOrder="18" showInDefault="1" showInWebsite="1">
+                    <label>Default Size System</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\SizeSystem</source_model>
                 </field>
 
                 <field id="ean" translate="label comment tooltip" type="select" sortOrder="20" showInDefault="1" showInWebsite="1">
@@ -106,10 +97,30 @@
                     <br/>—The items will be automatically paired with the voucher within 2 hours.]]></tooltip>
                 </field>
 
-                <field id="categories" translate="label comment tooltip" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="categories_attribute_enabled" translate="label" type="select" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Mapping Categories based on Product Attribute</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        <![CDATA[You can choose to map categories on the product level (use custom attribute which contains GLAMI category) or General mapping from this configuration - section bellow.]]>
+                    </comment>
+                </field>
+
+                <field id="category_attribute" translate="label comment tooltip" type="select" sortOrder="51" showInDefault="1" showInWebsite="1">
+                    <label>GLAMI Category Attribute</label>
+                    <source_model>Webcode\Glami\Model\Config\Source\Attribute</source_model>
+                    <depends>
+                        <field id="categories_attribute_enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="categories" translate="label comment tooltip" sortOrder="52" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Categories Mapping</label>
                     <frontend_model>Webcode\Glami\Block\Adminhtml\System\Config\Form\Field\Categories</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <depends>
+                        <field id="categories_attribute_enabled">0</field>
+                    </depends>
                 </field>
 
                 <field id="cron" translate="label comment" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
@@ -129,6 +140,43 @@ Default: 55 * * * * Hourly at 55 min of every hour.
                 </field>
             </group>
 
+            <group id="tracking" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Track with Google Analytucs</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Tracking with UTM Tags</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="utm_source" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Campaign Source</label>
+                    <comment>
+                        <![CDATA[Required. Referrer: google, newsletter4]]>
+                    </comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="utm_medium" translate="label comment" type="text" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Campaign Medium</label>
+                    <comment>
+                        <![CDATA[Required. Marketing Medium: cpc, banner, email]]>
+                    </comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="utm_campaign" translate="label comment" type="text" sortOrder="22" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Campaign Name</label>
+                    <comment>
+                        <![CDATA[Product, promo code, or slogan]]>
+                    </comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
         </section>
     </system>
 </config>

@@ -179,18 +179,19 @@ class Data extends AbstractHelper
      */
     public function formatPrice(float $price, bool $withCurrencyLabel = true, Store $store = null): string
     {
-        $currentCurrencyCode = $this->getCurrentStoreCurrency();
         if (!$store) {
             $store = $this->getCurrentStore();
         }
-        /* @phpstan-ignore-next-line */
-            $baseCurrencyCode = $store->getBaseCurrencyCode();
-        /* @phpstan-ignore-next-line */
-            $currentCurrencyCode = $store->getCurrentCurrencyCode();
 
-            if ($baseCurrencyCode !== $currentCurrencyCode) {
-                $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
-            }
+        /* @phpstan-ignore-next-line */
+        $baseCurrencyCode = $store->getBaseCurrencyCode();
+
+        /* @phpstan-ignore-next-line */
+        $currentCurrencyCode = $store->getCurrentCurrencyCode();
+
+        if ($baseCurrencyCode !== $currentCurrencyCode) {
+            $price = $store->getBaseCurrency()->convert($price, $currentCurrencyCode);
+        }
 
         return number_format($price, 2) . ($withCurrencyLabel === true ? (' ' . $currentCurrencyCode) : '');
     }
@@ -340,23 +341,25 @@ class Data extends AbstractHelper
      */
     public function getGlamiCategory(array $productCategories): ?string
     {
-        $categoriesConfigData = '';
-        try {
-            $categoriesConfigData = $this->getConfigData('feed/categories');
-        } catch (Exception $e) {
-            $this->logger($e->getMessage());
-        }
+        if (!$this->getConfigData('feed/categories_attribute_enabled')) {
+            $categoriesConfigData = '';
+            try {
+                $categoriesConfigData = $this->getConfigData('feed/categories');
+            } catch (Exception $e) {
+                $this->logger($e->getMessage());
+            }
 
-        if ($categories = $this->json->unserialize($categoriesConfigData)) {
-            foreach ($categories as $category) {
-                if (!empty($category['target']) && \in_array($category['source_id'], $productCategories, true)) {
-                    $glamiCategoryIds[] = $category['target'];
+            if ($categories = $this->json->unserialize($categoriesConfigData)) {
+                foreach ($categories as $category) {
+                    if (!empty($category['target']) && \in_array($category['source_id'], $productCategories, true)) {
+                        $glamiCategoryIds[] = $category['target'];
+                    }
                 }
             }
-        }
 
-        if (isset($glamiCategoryIds) && $glamiCategories = $this->getGlamiCategories()) {
-            return $glamiCategories[max($glamiCategoryIds)];
+            if (isset($glamiCategoryIds) && $glamiCategories = $this->getGlamiCategories()) {
+                return $glamiCategories[max($glamiCategoryIds)];
+            }
         }
 
         return null;
@@ -447,8 +450,35 @@ class Data extends AbstractHelper
     {
         if ($store = $this->getCurrentStore()) {
             /* @phpstan-ignore-next-line */
-            $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
-            return $baseUrl . self::FEED_DIR . $this->getFeedFilename();
+            return $store->getBaseUrl(UrlInterface::URL_TYPE_WEB) . self::FEED_DIR . $this->getFeedFilename();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get UTM Tracking Parameters
+     *
+     * @return string|null
+     * @throws \Exception
+     */
+    public function getUtmTracking(): ?string
+    {
+        $utmParams = [];
+        if ($this->getConfigData('tracking/enabled')) {
+            if ($param = $this->getConfigData('tracking/utm_source')) {
+                $utmParams['utm_source'] = $param;
+            }
+
+            if ($param = $this->getConfigData('tracking/utm_medium')) {
+                $utmParams['utm_medium'] = $param;
+            }
+
+            if ($param = $this->getConfigData('tracking/utm_campaign')) {
+                $utmParams['utm_campaign'] = $param;
+            }
+
+            return http_build_query($utmParams);
         }
 
         return null;
