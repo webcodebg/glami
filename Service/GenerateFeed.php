@@ -283,6 +283,7 @@ class GenerateFeed
 
                 if ($attributeValue = $this->getAttributeValue($product, 'size')) {
                     $item->addChild('SIZE', $attributeValue);
+                }
 
                 if ($attributeValue = $this->getAttributeValue($product, 'ean')) {
                     $item->addChild('EAN', $attributeValue);
