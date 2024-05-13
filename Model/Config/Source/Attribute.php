@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Webcode\Glami\Model\Config\Source;
 
+use Magento\Catalog\Api\ProductAttributeRepositoryInterface;
 use Magento\Catalog\Model\Product\Attribute\Repository as AttributeRepository;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 
@@ -20,7 +21,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 class Attribute
 {
     /**
-     * @var \Magento\Catalog\Model\Product\Attribute\Repository
+     * @var ProductAttributeRepositoryInterface
      */
     protected $attributeRepository;
 
@@ -30,12 +31,12 @@ class Attribute
     protected $searchCriteriaBuilder;
 
     /**
-     * @param AttributeRepository $attributeRepository
+     * @param ProductAttributeRepositoryInterface $attributeRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
-        AttributeRepository $attributeRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        ProductAttributeRepositoryInterface $attributeRepository,
+        SearchCriteriaBuilder               $searchCriteriaBuilder
     ) {
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->attributeRepository   = $attributeRepository;

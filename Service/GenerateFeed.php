@@ -328,7 +328,6 @@ class GenerateFeed
                     $this->addChildWithCData($attribute, 'VALUE', $defaultSizeSystem);
                 }
 
-                /* @phpstan-ignore-next-line */
                 if (!$categoryMapping &&
                     $category = $this->helper->getGlamiCategory($this->getProduct()->getCategoryIds())) {
                     $item->addChild('CATEGORYTEXT', $category);
@@ -409,7 +408,7 @@ class GenerateFeed
     /**
      * Get Visible Product.
      *
-     * @return \Magento\Catalog\Api\Data\ProductInterface
+     * @return ProductInterface
      */
     private function getProduct(): ProductInterface
     {
