@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Webcode\Glami\Console\Command;
 
+use Exception;
 use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBarFactory;
@@ -21,27 +22,15 @@ use Webcode\Glami\Service\GenerateFeed as GenerateFeedService;
 class GenerateFeed extends Command
 {
     /**
-     * @var ProgressBarFactory
-     */
-    private $progressBarFactory;
-
-    /**
-     * @var GenerateFeedService
-     */
-    private $generateFeedService;
-
-    /**
      * GenerateFeed constructor.
      *
-     * @param \Symfony\Component\Console\Helper\ProgressBarFactory $progressBarFactory
-     * @param \Webcode\Glami\Service\GenerateFeed $generateFeedService
+     * @param ProgressBarFactory $progressBarFactory
+     * @param GenerateFeedService $generateFeedService
      */
     public function __construct(
-        ProgressBarFactory $progressBarFactory,
-        GenerateFeedService $generateFeedService
+        private ProgressBarFactory $progressBarFactory,
+        private GenerateFeedService $generateFeedService
     ) {
-        $this->progressBarFactory = $progressBarFactory;
-        $this->generateFeedService = $generateFeedService;
         parent::__construct();
     }
 
@@ -62,7 +51,7 @@ class GenerateFeed extends Command
      * @param OutputInterface $output
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */

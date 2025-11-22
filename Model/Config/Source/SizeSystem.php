@@ -14,7 +14,7 @@ namespace Webcode\Glami\Model\Config\Source;
 use Magento\Framework\Data\OptionSourceInterface;
 
 /**
- * Product type model
+ * StockQuantity type model
  *
  */
 class SizeSystem implements OptionSourceInterface

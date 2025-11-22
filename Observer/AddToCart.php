@@ -30,7 +30,7 @@ class AddToCart implements ObserverInterface
     protected $glamiSession;
 
     /**
-     * Product
+     * StockQuantity
      *
      * @var ProductFactory
      */

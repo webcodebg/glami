@@ -22,7 +22,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Webcode\Glami\Helper\Data as HelperData;
 
 /**
- * Product Information to view
+ * StockQuantity Information to view
  */
 class ProductView extends Pixel
 {
@@ -121,7 +121,7 @@ class ProductView extends Pixel
     }
 
     /**
-     * Get Product ID from session.
+     * Get StockQuantity ID from session.
      *
      * @return int|null
      */

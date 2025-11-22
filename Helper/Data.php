@@ -17,6 +17,7 @@ use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Module\Dir;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -168,7 +169,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Format Product Price. Convert currency and add currency label.
+     * Format StockQuantity Price. Convert currency and add currency label.
      *
      * @param float $price
      * @param bool $withCurrencyLabel
@@ -177,7 +178,7 @@ class Data extends AbstractHelper
      * @return string
      * @throws \Exception
      */
-    public function formatPrice(float $price, bool $withCurrencyLabel = true, Store $store = null): string
+    public function formatPrice(float $price, bool $withCurrencyLabel = true, ?Store $store = null): string
     {
         if (!$store) {
             $store = $this->getCurrentStore();
@@ -197,7 +198,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get Current Store Curreny
+     * Get Current Store Currency
      *
      * @return string
      */
@@ -422,7 +423,7 @@ class Data extends AbstractHelper
      * @param bool $withFilename
      *
      * @return string
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws FileSystemException
      */
     public function getFeedPath(bool $withFilename = false): string
     {
@@ -449,7 +450,6 @@ class Data extends AbstractHelper
     public function getFeedUrl(): ?string
     {
         if ($store = $this->getCurrentStore()) {
-            /* @phpstan-ignore-next-line */
             return $store->getBaseUrl(UrlInterface::URL_TYPE_WEB) . self::FEED_DIR . $this->getFeedFilename();
         }
 

@@ -16,11 +16,14 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
+use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\ConfigurableProduct\Model\Product\Type\ConfigurableFactory;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Data\Collection;
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Io\File;
@@ -44,19 +47,9 @@ use Webcode\Glami\Helper\Data as Helper;
 class GenerateFeed
 {
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var int[]
      */
-    private StoreManagerInterface $storeManager;
-
-    /**
-     * @var \Webcode\Glami\Helper\Data
-     */
-    private Helper $helper;
-
-    /**
-     * @var \Magento\Store\Api\Data\StoreInterface
-     */
-    private StoreInterface $store;
+    private array $stockId = [];
 
     /**
      * @var ProgressBar|null
@@ -64,107 +57,51 @@ class GenerateFeed
     private ?ProgressBar $progressBar = null;
 
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
+     * @var StoreInterface
      */
-    private ProductCollectionFactory $productCollection;
+    private StoreInterface $store;
 
     /**
-     * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
-     */
-    private ProductStatus $productStatus;
-
-    /**
-     * @var \Magento\InventorySalesApi\Api\StockResolverInterface
-     */
-    private StockResolverInterface $stockResolver;
-
-    /**
-     * @var int[]
-     */
-    private array $stockId = [];
-
-    /**
-     * @var \Magento\InventorySalesApi\Api\AreProductsSalableInterface
-     */
-    private AreProductsSalableInterface $areProductsSalable;
-
-    /**
-     * @var \Magento\Catalog\Model\Product
+     * @var Product
      */
     private Product $product;
 
     /**
-     * @var \Magento\ConfigurableProduct\Model\Product\Type\ConfigurableFactory
-     */
-    private ConfigurableFactory $configurableFactory;
-
-    /**
-     * @var \Magento\Catalog\Api\ProductRepositoryInterface
-     */
-    private ProductRepositoryInterface $productRepository;
-
-    /**
-     * @var \Magento\Catalog\Model\Product\Visibility
-     */
-    private Product\Visibility $productVisibility;
-
-    /**
-     * @var \Magento\Framework\Filesystem
-     */
-    private Filesystem $filesystem;
-
-    /**
-     * @var \Magento\Framework\Filesystem\Io\File
-     */
-    private File $file;
-
-    /**
-     * Product Feed constructor.
+     * StockQuantity Feed constructor.
      *
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param StoreManagerInterface $storeManager
      * @param Helper $helper
      * @param ProductCollectionFactory $productCollectionFactory
      * @param ProductStatus $productStatus
-     * @param \Magento\InventorySalesApi\Api\StockResolverInterface $stockResolver
-     * @param \Magento\InventorySalesApi\Api\AreProductsSalableInterface $areProductsSalable
-     * @param \Magento\ConfigurableProduct\Model\Product\Type\ConfigurableFactory $configurableFactory
+     * @param StockResolverInterface $stockResolver
+     * @param AreProductsSalableInterface $areProductsSalable
+     * @param ConfigurableFactory $configurableFactory
      * @param ProductRepositoryInterface $productRepository
-     * @param \Magento\Catalog\Model\Product\Visibility $productVisibility
-     * @param \Magento\Framework\Filesystem $filesystem
+     * @param Visibility $productVisibility
+     * @param Filesystem $filesystem
      * @param File $file
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
-        StoreManagerInterface $storeManager,
-        Helper $helper,
-        ProductCollectionFactory $productCollectionFactory,
-        ProductStatus $productStatus,
-        StockResolverInterface $stockResolver,
-        AreProductsSalableInterface $areProductsSalable,
-        ConfigurableFactory $configurableFactory,
-        ProductRepositoryInterface $productRepository,
-        Product\Visibility $productVisibility,
-        Filesystem $filesystem,
-        File $file
+        private StoreManagerInterface $storeManager,
+        private Helper $helper,
+        private ProductCollectionFactory $productCollectionFactory,
+        private ProductStatus $productStatus,
+        private StockResolverInterface $stockResolver,
+        private AreProductsSalableInterface $areProductsSalable,
+        private ConfigurableFactory $configurableFactory,
+        private ProductRepositoryInterface $productRepository,
+        private Visibility $productVisibility,
+        private Filesystem $filesystem,
+        private File $file
     ) {
-        $this->storeManager = $storeManager;
-        $this->helper = $helper;
-        $this->productCollection = $productCollectionFactory;
-        $this->productStatus = $productStatus;
-        $this->stockResolver = $stockResolver;
-        $this->areProductsSalable = $areProductsSalable;
-        $this->configurableFactory = $configurableFactory;
-        $this->productRepository = $productRepository;
-        $this->productVisibility = $productVisibility;
-        $this->filesystem = $filesystem;
-        $this->file = $file;
     }
 
     /**
      * Set ProgressBar to Console.
      *
-     * @param \Symfony\Component\Console\Helper\ProgressBar $progressBar
+     * @param ProgressBar $progressBar
      */
     public function setProgressBar(ProgressBar $progressBar): void
     {
@@ -177,14 +114,13 @@ class GenerateFeed
      * @param string|null $storeCode
      *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Exception
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @throws Exception
      */
-    public function execute(string $storeCode = null): array
+    public function execute(?string $storeCode = null): array
     {
         foreach ($this->storeManager->getStores() as $store) {
-            /* @phpstan-ignore-next-line */
             if (($storeCode === null || $store->getCode() === $storeCode)
                 && $store->getIsActive()
                 && $this->helper->isActive($store->getId())
@@ -211,14 +147,14 @@ class GenerateFeed
     }
 
     /**
-     * Genereate feed for every store.
+     * Generate feed for every store.
      *
      * @return void
      *
-     * @throws \Magento\Framework\Exception\FileSystemException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Exception
+     * @throws FileSystemException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @throws Exception
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
@@ -239,7 +175,6 @@ class GenerateFeed
         $defaultSizeSystem = $this->helper->getConfigData('feed/size_system');
 
         foreach ($productsCollection as $product) {
-            /** @var Product $product */
             if ($this->isProductAvailable($product->getSku())) {
                 $this->product = $product;
 
@@ -254,7 +189,7 @@ class GenerateFeed
 
                 $url = $this->getProduct()->getProductUrl();
                 if ($utmParams = $this->helper->getUtmTracking()) {
-                    $url .= (strpos($url, '?') === false ? '?' : '&') . $utmParams;
+                    $url .= (!str_contains($url, '?') ? '?' : '&') . $utmParams;
                 }
 
                 /* @phpstan-ignore-next-line */
@@ -265,7 +200,7 @@ class GenerateFeed
                 $images = $product->getMediaGalleryImages();
                 if ($images instanceof Collection) {
                     foreach ($images as $image) {
-                        /** @var \Magento\Framework\DataObject $image */
+                        /** @var DataObject $image */
                         if ($product->getImage() !== $image->getData('file')) {
                             $item->addChild('IMGURL_ALTERNATIVE', $image->getData('url'));
                         } else {
@@ -274,7 +209,6 @@ class GenerateFeed
                     }
                 }
 
-                /* @phpstan-ignore-next-line */
                 $item->addChild('PRICE_VAT', (string) $this->getProduct()->getFinalPrice());
 
                 if ($attributeValue = $this->getAttributeValue($product, 'manufacturer')) {
@@ -359,7 +293,7 @@ class GenerateFeed
      */
     public function getProductsCollection(): \Magento\Catalog\Model\ResourceModel\Product\Collection
     {
-        $collection = $this->productCollection->create();
+        $collection = $this->productCollectionFactory->create();
         $collection->addAttributeToSelect('*')->setStore($this->store);
         $collection->addAttributeToFilter('status', ['in' => $this->productStatus->getVisibleStatusIds()]);
         $collection->addAttributeToFilter('is_saleable', ['eq' => 1]);
@@ -406,7 +340,7 @@ class GenerateFeed
     }
 
     /**
-     * Get Visible Product.
+     * Get Visible StockQuantity.
      *
      * @return ProductInterface
      */
@@ -435,8 +369,8 @@ class GenerateFeed
      * @param StoreInterface $store
      *
      * @return int
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     private function getStockIdByStore(StoreInterface $store): int
     {
@@ -451,13 +385,13 @@ class GenerateFeed
     }
 
     /**
-     * Check Product availability.
+     * Check StockQuantity availability.
      *
      * @param string $sku
      *
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     private function isProductAvailable(string $sku): bool
     {
